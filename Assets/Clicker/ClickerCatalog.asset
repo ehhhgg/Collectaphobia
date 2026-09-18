@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cb7476f84ff1bc43b52df8be9c3163f, type: 3}
+  m_Name: ClickerCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::ClickerCatalog
+  relics:
+  - rarity: 0
+    prefab: {fileID: 1194536141242494251, guid: 4733fd7431113e0408bbbaf7d4a9dfc3, type: 3}
+  - rarity: 1
+    prefab: {fileID: 721987647898309123, guid: f7efc87ec6967c04bae53e567eed096b, type: 3}
+  - rarity: 2
+    prefab: {fileID: 1467753070536414327, guid: a93d8aad2b4a84f4bad9e5b6c0274af4, type: 3}
+  - rarity: 3
+    prefab: {fileID: 2715516939517112976, guid: bc8b807f8ca0e7e48aa8d45bf179a875, type: 3}
+  - rarity: 4
+    prefab: {fileID: 2168806427850938138, guid: 8556d85016c4cc248a89353e6689f760, type: 3}
+  autoClickers:
+  - id: flicker
+    displayName: Flicker
+    baseCost: 15
+    clicksPerSecond: 0.2
+    prefab: {fileID: 8911020245920331680, guid: 15036f73b009a3440b5934370915ef3e, type: 3}
+  - id: lantern
+    displayName: Lantern
+    baseCost: 80
+    clicksPerSecond: 1
+    prefab: {fileID: 5770518766062315222, guid: 67974105dda79d741b03d029be8f0347, type: 3}
+  - id: beacon
+    displayName: Beacon
+    baseCost: 420
+    clicksPerSecond: 5
+    prefab: {fileID: 9036198169109354316, guid: c69664ff59da0be489d3dfbd01ef3075, type: 3}
+  - id: lighthouse
+    displayName: Lighthouse
+    baseCost: 2200
+    clicksPerSecond: 20
+    prefab: {fileID: 824093271355728356, guid: dc28aca38718f9a48b93e8ee54b82147, type: 3}
