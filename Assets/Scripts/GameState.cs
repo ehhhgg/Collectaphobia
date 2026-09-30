@@ -38,6 +38,17 @@ public class GameState
         AutoClickers[id] = AutoCount(id) + 1;
     }
 
+    public void Clear()
+    {
+        Courage = 0d;
+        TotalClicks = 0;
+        ClicksUntilRelic = 1;
+        Relics.Clear();
+        AutoClickers.Clear();
+        PhobiaCounts.Clear();
+        Missions.Clear();
+    }
+
     public MissionRecord MissionFor(string phobiaId)
     {
         if (string.IsNullOrEmpty(phobiaId))

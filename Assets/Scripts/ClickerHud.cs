@@ -24,6 +24,7 @@ public class ClickerHud : MonoBehaviour
     [SerializeField] Text clickPopupTemplate;
     [SerializeField] AutoClickerShopRow[] shopRows;
     [SerializeField] RarityCountLabel[] rarityCounts;
+    [SerializeField] PhobiaReveal reveal;
 
     static readonly Color Accent = new(0.95f, 0.42f, 0.55f);
 
@@ -48,6 +49,9 @@ public class ClickerHud : MonoBehaviour
 
         if (clickPopupTemplate != null)
             clickPopupTemplate.gameObject.SetActive(false);
+
+        if (reveal == null)
+            reveal = GetComponent<PhobiaReveal>();
 
         game.StateChanged += Refresh;
         Refresh();
@@ -74,6 +78,16 @@ public class ClickerHud : MonoBehaviour
         }
 
         StartCoroutine(FloatAndFade(popup));
+    }
+
+    public bool IsRevealOpen => reveal != null && reveal.IsOpen;
+
+    public void ShowFirstUnlock(PhobiaDefinition def)
+    {
+        HideHint();
+        if (reveal != null)
+            reveal.Show(def);
+        RefreshInventory();
     }
 
     public void ShowRelicToast(PhobiaDefinition def)

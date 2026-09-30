@@ -49,10 +49,17 @@ public class ClickerGame : MonoBehaviour
 
     public void ManualClick()
     {
+        if (hud != null && hud.IsRevealOpen)
+            return;
+
         if (world != null && world.TryOpenBall(out var def) && def != null)
         {
+            var firstTime = State.PhobiaCount(def.id) == 0;
             State.AddPhobia(def.id, def.rarity);
-            hud.ShowRelicToast(def);
+            if (firstTime)
+                hud.ShowFirstUnlock(def);
+            else
+                hud.ShowRelicToast(def);
             Notify();
             return;
         }
@@ -81,6 +88,21 @@ public class ClickerGame : MonoBehaviour
     {
         if (world != null)
             world.RefreshAutoClickers(State);
+        Notify();
+    }
+
+    public void ResetProgress()
+    {
+        _autoBank = 0f;
+        _missionReadyToastId = null;
+        State.Clear();
+        State.ClicksUntilRelic = RollRelicThreshold();
+        if (world != null)
+        {
+            world.ClearDrops();
+            world.RefreshAutoClickers(State);
+        }
+
         Notify();
     }
 

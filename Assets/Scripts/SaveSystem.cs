@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class SaveSystem : MonoBehaviour
 {
-    const string SaveTimeKey = "LastSaveTime";
-    const string StateKey = "ClickerState";
+    public const string SaveTimeKey = "LastSaveTime";
+    public const string StateKey = "ClickerState";
     const double MaxOfflineSeconds = 7d * 24d * 60d * 60d;
 
     [SerializeField] ClickerGame game;
@@ -81,6 +81,21 @@ public class SaveSystem : MonoBehaviour
     void OnDisable()
     {
         WriteSave();
+    }
+
+    [ContextMenu("Clear Save Data")]
+    public void ResetProgress()
+    {
+        DeleteSavedData();
+        if (game != null)
+            game.ResetProgress();
+    }
+
+    public static void DeleteSavedData()
+    {
+        PlayerPrefs.DeleteKey(SaveTimeKey);
+        PlayerPrefs.DeleteKey(StateKey);
+        PlayerPrefs.Save();
     }
 
     void LoadState()

@@ -40,6 +40,19 @@ public class ClickerWorld : MonoBehaviour
         FitViewport();
     }
 
+    public void ClearDrops()
+    {
+        StopAllCoroutines();
+        for (var i = 0; i < _shelfItems.Count; i++)
+        {
+            if (_shelfItems[i] != null)
+                Destroy(_shelfItems[i]);
+        }
+
+        _shelfItems.Clear();
+        _sealedBalls.Clear();
+    }
+
     public void PulseAutoClickers()
     {
         var count = Mathf.Min(_autoVisuals.Count, 8);
