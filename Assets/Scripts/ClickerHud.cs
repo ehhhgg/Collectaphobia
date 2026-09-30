@@ -76,10 +76,12 @@ public class ClickerHud : MonoBehaviour
         StartCoroutine(FloatAndFade(popup));
     }
 
-    public void ShowRelicToast(Rarity rarity)
+    public void ShowRelicToast(PhobiaDefinition def)
     {
         HideHint();
-        ShowToast(RarityStyle.Label(rarity), RarityStyle.Color(rarity));
+        if (def == null)
+            return;
+        ShowToast($"{def.Label}  ·  {RarityStyle.Label(def.rarity)}", RarityStyle.Color(def.rarity));
         RefreshInventory();
     }
 
@@ -90,7 +92,7 @@ public class ClickerHud : MonoBehaviour
         ShowToast($"Away {FormatDuration(elapsed)}  ·  +{Format(amount)} Courage", Accent, 2.6f);
     }
 
-    void ShowToast(string message, Color color, float hold = 1.8f)
+    public void ShowToast(string message, Color color, float hold = 1.8f)
     {
         if (toastText == null)
             return;

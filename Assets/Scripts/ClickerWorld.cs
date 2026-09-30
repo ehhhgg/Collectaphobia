@@ -51,16 +51,16 @@ public class ClickerWorld : MonoBehaviour
         }
     }
 
-    public void StorePhobia(Rarity rarity)
+    public void StorePhobia(PhobiaDefinition def)
     {
-        if (ballPrefab == null)
+        if (ballPrefab == null || def == null)
             return;
-        StartCoroutine(BallFlight(rarity));
+        StartCoroutine(BallFlight(def));
     }
 
-    public bool TryOpenBall(out Rarity rarity)
+    public bool TryOpenBall(out PhobiaDefinition def)
     {
-        rarity = default;
+        def = null;
         if (playCamera == null || Pointer.current == null)
             return false;
 
@@ -80,8 +80,10 @@ public class ClickerWorld : MonoBehaviour
         if (hit == null)
             return false;
 
-        rarity = hit.ContainedRarity;
-        StartCoroutine(OpenBall(hit));
+        def = catalog != null ? catalog.PhobiaById(hit.ContainedId) : null;
+        if (def == null && catalog != null)
+            def = catalog.PhobiaOf(hit.ContainedRarity);
+        StartCoroutine(OpenBall(hit, def));
         return true;
     }
 
@@ -124,13 +126,13 @@ public class ClickerWorld : MonoBehaviour
         }
     }
 
-    IEnumerator BallFlight(Rarity rarity)
+    IEnumerator BallFlight(PhobiaDefinition def)
     {
         var start = dropOrigin != null ? dropOrigin.position : transform.position;
         var slot = NextShelfSlot();
         var ball = Instantiate(ballPrefab, start, Quaternion.identity, transform);
         ball.name = "PhobiaBall";
-        ball.Setup(rarity);
+        ball.Setup(def);
         _shelfItems.Add(ball.gameObject);
         _sealedBalls.Add(ball);
 
@@ -162,20 +164,18 @@ public class ClickerWorld : MonoBehaviour
         TrimShelf();
     }
 
-    IEnumerator OpenBall(PhobiaBall ball)
+    IEnumerator OpenBall(PhobiaBall ball, PhobiaDefinition def)
     {
         var slot = ball.transform.position;
-        var rarity = ball.ContainedRarity;
         _sealedBalls.Remove(ball);
         _shelfItems.Remove(ball.gameObject);
 
-        var def = catalog != null ? catalog.RelicOf(rarity) : null;
         GameObject relic = null;
         var fullScale = Vector3.one;
         if (def != null && def.prefab != null)
         {
             relic = Instantiate(def.prefab, slot, def.prefab.transform.rotation, shelf);
-            relic.name = rarity.ToString();
+            relic.name = def.Label;
             fullScale = relic.transform.localScale;
             relic.transform.localScale = Vector3.zero;
             _shelfItems.Add(relic);

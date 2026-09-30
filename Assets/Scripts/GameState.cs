@@ -10,19 +10,59 @@ public class GameState
     public int ClicksUntilRelic;
     public readonly Dictionary<Rarity, int> Relics = new();
     public readonly Dictionary<string, int> AutoClickers = new();
+    public readonly Dictionary<string, int> PhobiaCounts = new();
+    public readonly List<MissionRecord> Missions = new();
 
     public int RelicCount(Rarity rarity) => Relics.TryGetValue(rarity, out var n) ? n : 0;
 
     public int AutoCount(string id) => AutoClickers.TryGetValue(id, out var n) ? n : 0;
+
+    public int PhobiaCount(string id) =>
+        !string.IsNullOrEmpty(id) && PhobiaCounts.TryGetValue(id, out var n) ? n : 0;
 
     public void AddRelic(Rarity rarity)
     {
         Relics[rarity] = RelicCount(rarity) + 1;
     }
 
+    public void AddPhobia(string id, Rarity rarity)
+    {
+        AddRelic(rarity);
+        if (string.IsNullOrEmpty(id))
+            return;
+        PhobiaCounts[id] = PhobiaCount(id) + 1;
+    }
+
     public void AddAuto(string id)
     {
         AutoClickers[id] = AutoCount(id) + 1;
+    }
+
+    public MissionRecord MissionFor(string phobiaId)
+    {
+        if (string.IsNullOrEmpty(phobiaId))
+            return null;
+
+        for (var i = 0; i < Missions.Count; i++)
+        {
+            if (Missions[i] != null && Missions[i].phobiaId == phobiaId)
+                return Missions[i];
+        }
+
+        return null;
+    }
+
+    public bool IsPhobiaOnMission(string phobiaId) => MissionFor(phobiaId) != null;
+
+    public MissionRecord FirstCompletableMission()
+    {
+        for (var i = 0; i < Missions.Count; i++)
+        {
+            if (Missions[i] != null && Missions[i].IsComplete)
+                return Missions[i];
+        }
+
+        return null;
     }
 
     public float ClicksPerSecond(ClickerCatalog catalog)
@@ -46,13 +86,22 @@ public class GameState
         return Mathf.CeilToInt(def.baseCost * Mathf.Pow(1.18f, owned));
     }
 
-    public void Load(double courage, long totalClicks, int clicksUntilRelic, AutoEntry[] autos, int[] relics)
+    public void Load(
+        double courage,
+        long totalClicks,
+        int clicksUntilRelic,
+        AutoEntry[] autos,
+        int[] relics,
+        AutoEntry[] phobias = null,
+        MissionRecord[] missions = null)
     {
         Courage = courage;
         TotalClicks = totalClicks;
         ClicksUntilRelic = Mathf.Max(1, clicksUntilRelic);
         AutoClickers.Clear();
         Relics.Clear();
+        PhobiaCounts.Clear();
+        Missions.Clear();
 
         if (autos != null)
         {
@@ -64,15 +113,35 @@ public class GameState
             }
         }
 
-        if (relics == null)
+        if (relics != null)
+        {
+            var names = (Rarity[])Enum.GetValues(typeof(Rarity));
+            var count = Mathf.Min(relics.Length, names.Length);
+            for (var i = 0; i < count; i++)
+            {
+                if (relics[i] > 0)
+                    Relics[names[i]] = relics[i];
+            }
+        }
+
+        if (phobias != null)
+        {
+            foreach (var entry in phobias)
+            {
+                if (entry == null || string.IsNullOrEmpty(entry.id) || entry.count <= 0)
+                    continue;
+                PhobiaCounts[entry.id] = entry.count;
+            }
+        }
+
+        if (missions == null)
             return;
 
-        var names = (Rarity[])Enum.GetValues(typeof(Rarity));
-        var count = Mathf.Min(relics.Length, names.Length);
-        for (var i = 0; i < count; i++)
+        foreach (var mission in missions)
         {
-            if (relics[i] > 0)
-                Relics[names[i]] = relics[i];
+            if (mission == null || string.IsNullOrEmpty(mission.phobiaId))
+                continue;
+            Missions.Add(mission);
         }
     }
 
@@ -83,6 +152,20 @@ public class GameState
         foreach (var pair in AutoClickers)
             entries[i++] = new AutoEntry { id = pair.Key, count = pair.Value };
         return entries;
+    }
+
+    public AutoEntry[] SavePhobias()
+    {
+        var entries = new AutoEntry[PhobiaCounts.Count];
+        var i = 0;
+        foreach (var pair in PhobiaCounts)
+            entries[i++] = new AutoEntry { id = pair.Key, count = pair.Value };
+        return entries;
+    }
+
+    public MissionRecord[] SaveMissions()
+    {
+        return Missions.ToArray();
     }
 
     public int[] SaveRelics()

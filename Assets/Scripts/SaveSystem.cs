@@ -24,6 +24,8 @@ public class SaveSystem : MonoBehaviour
         public int clicksUntilRelic;
         public AutoEntry[] autos;
         public int[] relics;
+        public AutoEntry[] phobias;
+        public MissionRecord[] missions;
     }
 
     void Awake()
@@ -94,7 +96,7 @@ public class SaveSystem : MonoBehaviour
         if (data == null)
             return;
 
-        game.State.Load(data.courage, data.totalClicks, data.clicksUntilRelic, data.autos, data.relics);
+        game.State.Load(data.courage, data.totalClicks, data.clicksUntilRelic, data.autos, data.relics, data.phobias, data.missions);
     }
 
     void CollectOffline()
@@ -135,7 +137,9 @@ public class SaveSystem : MonoBehaviour
             totalClicks = state.TotalClicks,
             clicksUntilRelic = state.ClicksUntilRelic,
             autos = state.SaveAutos(),
-            relics = state.SaveRelics()
+            relics = state.SaveRelics(),
+            phobias = state.SavePhobias(),
+            missions = state.SaveMissions()
         };
 
         PlayerPrefs.SetString(StateKey, JsonUtility.ToJson(data));

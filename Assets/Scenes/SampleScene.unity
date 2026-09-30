@@ -2918,6 +2918,7 @@ GameObject:
   - component: {fileID: 1235305652}
   - component: {fileID: 1235305651}
   - component: {fileID: 1235305649}
+  - component: {fileID: 1235305654}
   m_Layer: 0
   m_Name: HUD
   m_TagString: Untagged
@@ -2963,6 +2964,19 @@ MonoBehaviour:
     label: {fileID: 1018682772}
   - rarity: 4
     label: {fileID: 1855312049}
+--- !u!114 &1235305654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1235305648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c8e2a1b9d6f47c0a5e3b8d1f0274c91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CollectionScreen
+  game: {fileID: 3141815}
 --- !u!224 &1235305650
 RectTransform:
   m_ObjectHideFlags: 0

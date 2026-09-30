@@ -9,6 +9,7 @@ public class PhobiaBall : MonoBehaviour
     Vector3 _baseScale;
     bool _landed;
 
+    public string ContainedId { get; private set; }
     public Rarity ContainedRarity { get; private set; }
     public bool CanOpen => _landed;
 
@@ -32,9 +33,10 @@ public class PhobiaBall : MonoBehaviour
         transform.localScale = _baseScale * breathe;
     }
 
-    public void Setup(Rarity rarity)
+    public void Setup(PhobiaDefinition def)
     {
-        ContainedRarity = rarity;
+        ContainedId = def != null ? def.id : null;
+        ContainedRarity = def != null ? def.rarity : default;
         _landed = false;
         ApplySealedLook();
     }

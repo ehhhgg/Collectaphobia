@@ -12,17 +12,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cb7476f84ff1bc43b52df8be9c3163f, type: 3}
   m_Name: ClickerCatalog
   m_EditorClassIdentifier: Assembly-CSharp::ClickerCatalog
-  relics:
-  - rarity: 0
+  phobias:
+  - id: common
+    displayName: Common
+    rarity: 0
+    art: {fileID: 0}
     prefab: {fileID: 1194536141242494251, guid: 4733fd7431113e0408bbbaf7d4a9dfc3, type: 3}
-  - rarity: 1
+    notes: 
+  - id: uncommon
+    displayName: Uncommon
+    rarity: 1
+    art: {fileID: 0}
     prefab: {fileID: 721987647898309123, guid: f7efc87ec6967c04bae53e567eed096b, type: 3}
-  - rarity: 2
+    notes: 
+  - id: rare
+    displayName: Rare
+    rarity: 2
+    art: {fileID: 0}
     prefab: {fileID: 1467753070536414327, guid: a93d8aad2b4a84f4bad9e5b6c0274af4, type: 3}
-  - rarity: 3
+    notes: 
+  - id: epic
+    displayName: Epic
+    rarity: 3
+    art: {fileID: 0}
     prefab: {fileID: 2715516939517112976, guid: bc8b807f8ca0e7e48aa8d45bf179a875, type: 3}
-  - rarity: 4
+    notes: 
+  - id: legendary
+    displayName: Legendary
+    rarity: 4
+    art: {fileID: 0}
     prefab: {fileID: 2168806427850938138, guid: 8556d85016c4cc248a89353e6689f760, type: 3}
+    notes: 
   autoClickers:
   - id: flicker
     displayName: Flicker
