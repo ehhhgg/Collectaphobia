@@ -10,6 +10,9 @@ public class PhobiaDefinition
     public Rarity rarity;
     public Texture art;
     public GameObject prefab;
+    public string artist;
+    [TextArea(3, 8)]
+    public string description;
     [TextArea]
     public string notes;
 

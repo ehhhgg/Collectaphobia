@@ -20,6 +20,8 @@ public class PhobiaCatalogWindow : EditorWindow
     Rarity _rarity = Rarity.Common;
     Texture _art;
     GameObject _existingPrefab;
+    string _artist = "";
+    string _description = "";
     string _notes = "";
     string _status = "";
     MessageType _statusType = MessageType.Info;
@@ -28,7 +30,7 @@ public class PhobiaCatalogWindow : EditorWindow
     public static void Open()
     {
         var window = GetWindow<PhobiaCatalogWindow>("Phobia Catalog");
-        window.minSize = new Vector2(460, 560);
+        window.minSize = new Vector2(480, 680);
         window.Show();
     }
 
@@ -43,7 +45,7 @@ public class PhobiaCatalogWindow : EditorWindow
         EditorGUILayout.Space(8);
         EditorGUILayout.LabelField("Add Phobia Characters", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(
-            "Team members can register a named phobia here. It is added to the clicker catalog, gets a prefab, and can drop when that rarity is rolled.",
+            "Team members can register a named phobia here. Fill artist and description so Collection inspect can show them. The entry is added to the clicker catalog, gets a prefab, and can drop when that rarity is rolled.",
             MessageType.Info);
 
         EditorGUI.BeginChangeCheck();
@@ -77,7 +79,7 @@ public class PhobiaCatalogWindow : EditorWindow
         var count = _catalog.phobias != null ? _catalog.phobias.Length : 0;
         EditorGUILayout.LabelField($"In catalog  ({count})", EditorStyles.boldLabel);
 
-        _listScroll = EditorGUILayout.BeginScrollView(_listScroll, GUILayout.Height(180));
+        _listScroll = EditorGUILayout.BeginScrollView(_listScroll, GUILayout.Height(240));
         if (count == 0)
             EditorGUILayout.LabelField("None yet.", EditorStyles.miniLabel);
 
@@ -95,6 +97,18 @@ public class PhobiaCatalogWindow : EditorWindow
             EditorGUILayout.BeginVertical();
             EditorGUILayout.LabelField(string.IsNullOrEmpty(def.displayName) ? "(unnamed)" : def.displayName, EditorStyles.boldLabel);
             EditorGUILayout.LabelField($"{def.rarity}    id: {(string.IsNullOrEmpty(def.id) ? "—" : def.id)}", EditorStyles.miniLabel);
+            EditorGUI.BeginChangeCheck();
+            var artist = EditorGUILayout.TextField("Artist", def.artist ?? "");
+            var description = EditorGUILayout.TextArea(
+                string.IsNullOrEmpty(def.description) ? "" : def.description,
+                GUILayout.MinHeight(36));
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(_catalog, "Edit Phobia Details");
+                def.artist = artist;
+                def.description = description;
+                EditorUtility.SetDirty(_catalog);
+            }
             EditorGUILayout.EndVertical();
 
             GUI.enabled = def.prefab != null;
@@ -148,7 +162,10 @@ public class PhobiaCatalogWindow : EditorWindow
             _existingPrefab,
             typeof(GameObject),
             false);
-        _notes = EditorGUILayout.TextField("Notes", _notes);
+        _artist = EditorGUILayout.TextField("Artist", _artist);
+        EditorGUILayout.LabelField("Description");
+        _description = EditorGUILayout.TextArea(_description ?? "", GUILayout.MinHeight(56));
+        _notes = EditorGUILayout.TextField("Notes (internal)", _notes);
 
         if (_art != null)
         {
@@ -231,6 +248,8 @@ public class PhobiaCatalogWindow : EditorWindow
         entry.FindPropertyRelative("rarity").enumValueIndex = (int)_rarity;
         entry.FindPropertyRelative("art").objectReferenceValue = _art;
         entry.FindPropertyRelative("prefab").objectReferenceValue = prefab;
+        SetString(entry, "artist", _artist);
+        SetString(entry, "description", _description);
         SetString(entry, "notes", _notes);
         so.ApplyModifiedProperties();
         EditorUtility.SetDirty(_catalog);
@@ -352,6 +371,8 @@ public class PhobiaCatalogWindow : EditorWindow
         _idLocked = false;
         _art = null;
         _existingPrefab = null;
+        _artist = "";
+        _description = "";
         _notes = "";
     }
 

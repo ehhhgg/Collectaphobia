@@ -6,6 +6,7 @@ public class CollectionScreen : MonoBehaviour
 {
     [SerializeField] ClickerGame game;
 
+    ClickerHud _hud;
     RectTransform _canvas;
     GameObject _overlay;
     Text _progressText;
@@ -30,12 +31,16 @@ public class CollectionScreen : MonoBehaviour
         public Text nameText;
         public Text rarityText;
         public Text countText;
+        public Button inspectButton;
+        public Image inspectImage;
+        public Text inspectLabel;
     }
 
     void Awake()
     {
         if (game == null)
             game = GetComponentInParent<ClickerGame>();
+        _hud = GetComponent<ClickerHud>();
         _canvas = transform as RectTransform;
     }
 
@@ -167,6 +172,13 @@ public class CollectionScreen : MonoBehaviour
             row.art.texture = art;
             row.art.color = art != null ? Color.white : new Color(0.2f, 0.18f, 0.24f, 1f);
         }
+
+        if (row.inspectButton != null)
+            row.inspectButton.interactable = found;
+        if (row.inspectImage != null)
+            row.inspectImage.color = found ? Accent : new Color(0.3f, 0.28f, 0.34f, 1f);
+        if (row.inspectLabel != null)
+            row.inspectLabel.color = found ? Color.white : new Color(1f, 1f, 1f, 0.35f);
     }
 
     void RefreshMissionUi()
@@ -263,6 +275,15 @@ public class CollectionScreen : MonoBehaviour
             return;
         _selectedId = id;
         Refresh();
+    }
+
+    void Inspect(string id)
+    {
+        if (game == null || game.State.PhobiaCount(id) <= 0)
+            return;
+        var def = game.Catalog != null ? game.Catalog.PhobiaById(id) : null;
+        if (_hud != null)
+            _hud.ShowInspect(def);
     }
 
     void Build()
@@ -434,12 +455,17 @@ public class CollectionScreen : MonoBehaviour
         layout.preferredHeight = 92f;
         var bg = row.gameObject.AddComponent<Image>();
         bg.color = new Color(0.12f, 0.1f, 0.16f, 0.9f);
-        bg.raycastTarget = true;
-        var button = row.gameObject.AddComponent<Button>();
-        button.transition = Selectable.Transition.None;
-        button.targetGraphic = bg;
+        bg.raycastTarget = false;
         var id = def.id;
-        button.onClick.AddListener(() => Select(id));
+
+        var select = Create("Select", row);
+        Stretch(select, new Vector2(0f, 0f), new Vector2(0.7f, 1f));
+        var selectImage = select.gameObject.AddComponent<Image>();
+        selectImage.color = Color.clear;
+        var selectButton = select.gameObject.AddComponent<Button>();
+        selectButton.transition = Selectable.Transition.None;
+        selectButton.targetGraphic = selectImage;
+        selectButton.onClick.AddListener(() => Select(id));
 
         var artRt = Create("Art", row);
         Stretch(artRt, new Vector2(0.03f, 0.12f), new Vector2(0.18f, 0.88f));
@@ -447,17 +473,30 @@ public class CollectionScreen : MonoBehaviour
         art.color = new Color(0.2f, 0.18f, 0.24f, 1f);
         art.raycastTarget = false;
 
-        var name = CreateText("Name", row, def.Label, 28, TextAnchor.MiddleLeft, FontStyle.Bold);
-        Stretch(name.rectTransform, new Vector2(0.22f, 0.42f), new Vector2(0.72f, 0.9f));
+        var name = CreateText("Name", row, def.Label, 26, TextAnchor.MiddleLeft, FontStyle.Bold);
+        Stretch(name.rectTransform, new Vector2(0.19f, 0.46f), new Vector2(0.56f, 0.9f));
         name.raycastTarget = false;
 
-        var rarity = CreateText("Rarity", row, RarityStyle.Label(def.rarity), 20, TextAnchor.MiddleLeft);
-        Stretch(rarity.rectTransform, new Vector2(0.22f, 0.1f), new Vector2(0.72f, 0.48f));
+        var rarity = CreateText("Rarity", row, RarityStyle.Label(def.rarity), 18, TextAnchor.MiddleLeft);
+        Stretch(rarity.rectTransform, new Vector2(0.19f, 0.1f), new Vector2(0.56f, 0.5f));
         rarity.raycastTarget = false;
 
-        var count = CreateText("Count", row, "×0", 32, TextAnchor.MiddleRight, FontStyle.Bold);
-        Stretch(count.rectTransform, new Vector2(0.72f, 0.1f), new Vector2(0.96f, 0.9f));
+        var count = CreateText("Count", row, "×0", 26, TextAnchor.MiddleCenter, FontStyle.Bold);
+        Stretch(count.rectTransform, new Vector2(0.56f, 0.12f), new Vector2(0.7f, 0.88f));
         count.raycastTarget = false;
+
+        var inspect = Create("Inspect", row);
+        Stretch(inspect, new Vector2(0.72f, 0.18f), new Vector2(0.97f, 0.82f));
+        var inspectImage = inspect.gameObject.AddComponent<Image>();
+        inspectImage.color = Accent;
+        var inspectButton = inspect.gameObject.AddComponent<Button>();
+        inspectButton.targetGraphic = inspectImage;
+        inspectButton.transition = Selectable.Transition.None;
+        inspectButton.onClick.AddListener(() => Inspect(id));
+        var inspectLabel = CreateText("Label", inspect, "INSPECT", 16, TextAnchor.MiddleCenter, FontStyle.Bold);
+        inspectLabel.color = Color.white;
+        inspectLabel.raycastTarget = false;
+        Stretch(inspectLabel.rectTransform);
 
         return new Row
         {
@@ -466,7 +505,10 @@ public class CollectionScreen : MonoBehaviour
             art = art,
             nameText = name,
             rarityText = rarity,
-            countText = count
+            countText = count,
+            inspectButton = inspectButton,
+            inspectImage = inspectImage,
+            inspectLabel = inspectLabel
         };
     }
 
