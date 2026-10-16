@@ -77,6 +77,22 @@ MonoBehaviour:
     artist: 
     description: 
     notes: 
+  - id: robophobia
+    displayName: Robophobia
+    rarity: 1
+    art: {fileID: 2800000, guid: 843b10631e648e74dbcff598fd2c03ae, type: 3}
+    prefab: {fileID: 1194536141242494251, guid: b1c10eb4a0d661b46a01153b7b002f8e, type: 3}
+    artist: Jose
+    description: beep boop
+    notes: 
+  - id: thalassophobia
+    displayName: Thalassophobia
+    rarity: 1
+    art: {fileID: 2800000, guid: d631e83818196554a8f7ca0782f929d2, type: 3}
+    prefab: {fileID: 1194536141242494251, guid: 39ecfad30a2673c43b63b59fcbf41d59, type: 3}
+    artist: Jose
+    description: splish splash
+    notes: 
   autoClickers:
   - id: flicker
     displayName: Flicker
