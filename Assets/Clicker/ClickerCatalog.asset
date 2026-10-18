@@ -77,6 +77,15 @@ MonoBehaviour:
     artist: 
     description: 
     notes: 
+  - id: batrachophobia
+    displayName: Batrachophobia
+    rarity: 0
+    art: {fileID: 2800000, guid: 56da382f1980c794698397d471a80319, type: 3}
+    prefab: {fileID: 1194536141242494251, guid: a7a392abddf278241ad3dda0141eece3, type: 3}
+    artist: Artist Name
+    description: If avaiable input it in... Uhh Ribbit Ribbit I hope and you hate
+      me.
+    notes: 
   autoClickers:
   - id: flicker
     displayName: Flicker
