@@ -7,6 +7,8 @@ public class ClickerWorld : MonoBehaviour
 {
     const float TargetAspect = 9f / 16f;
     const float ShelfBallScale = 0.32f;
+    const int MaxOpenedOnShelf = 5;
+    const int ShelfColumns = 5;
 
     [SerializeField] Camera playCamera;
     [SerializeField] Transform dropOrigin;
@@ -19,6 +21,7 @@ public class ClickerWorld : MonoBehaviour
     readonly List<PhobiaBall> _sealedBalls = new();
     readonly List<GameObject> _autoVisuals = new();
     readonly List<Vector3> _autoBaseScales = new();
+    int _nextSlot;
 
     public int PendingCount
     {
@@ -51,6 +54,7 @@ public class ClickerWorld : MonoBehaviour
 
         _shelfItems.Clear();
         _sealedBalls.Clear();
+        _nextSlot = 0;
     }
 
     public void PulseAutoClickers()
@@ -221,15 +225,59 @@ public class ClickerWorld : MonoBehaviour
             relic.transform.localScale = fullScale;
         }
 
-        TrimShelf();
+        TrimOpenedPhobias();
     }
 
     Vector3 NextShelfSlot()
     {
-        var i = _shelfItems.Count % 10;
-        var col = i % 5;
-        var row = i / 5;
-        return shelf.TransformPoint(new Vector3((col - 2) * 0.52f, 0.22f, (row - 0.5f) * 0.28f));
+        var col = _nextSlot % ShelfColumns;
+        _nextSlot++;
+        return shelf.TransformPoint(new Vector3((col - 2) * 0.52f, 0.22f, 0f));
+    }
+
+    void TrimOpenedPhobias()
+    {
+        var opened = 0;
+        for (var i = 0; i < _shelfItems.Count; i++)
+        {
+            if (IsOpenedPhobia(_shelfItems[i]))
+                opened++;
+        }
+
+        var iOldest = 0;
+        while (opened > MaxOpenedOnShelf)
+        {
+            while (iOldest < _shelfItems.Count && !IsOpenedPhobia(_shelfItems[iOldest]))
+                iOldest++;
+            if (iOldest >= _shelfItems.Count)
+                break;
+
+            var oldest = _shelfItems[iOldest];
+            _shelfItems.RemoveAt(iOldest);
+            opened--;
+            if (oldest != null)
+                StartCoroutine(DespawnShelfItem(oldest));
+        }
+    }
+
+    static bool IsOpenedPhobia(GameObject item)
+    {
+        return item != null && item.GetComponent<PhobiaBall>() == null;
+    }
+
+    IEnumerator DespawnShelfItem(GameObject go)
+    {
+        var start = go.transform.localScale;
+        var t = 0f;
+        while (t < 0.2f && go != null)
+        {
+            t += Time.deltaTime;
+            go.transform.localScale = Vector3.Lerp(start, Vector3.zero, t / 0.2f);
+            yield return null;
+        }
+
+        if (go != null)
+            Destroy(go);
     }
 
     void TrimShelf()

@@ -8,7 +8,6 @@ public class PhobiaCatalogWindow : EditorWindow
 {
     const string CatalogPath = "Assets/Clicker/ClickerCatalog.asset";
     const string RootFolder = "Assets/Clicker/Phobias";
-    const string TemplatePrefab = "Assets/Clicker/Prefabs/Relic_Common.prefab";
     const string TemplateMaterial = "Assets/Clicker/Materials/Relic_Common.mat";
 
     ClickerCatalog _catalog;
@@ -45,7 +44,7 @@ public class PhobiaCatalogWindow : EditorWindow
         EditorGUILayout.Space(8);
         EditorGUILayout.LabelField("Add Phobia Characters", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(
-            "Team members can register a named phobia here. Fill artist and description so Collection inspect can show them. The entry is added to the clicker catalog, gets a prefab, and can drop when that rarity is rolled.",
+            "Add a named phobia to the catalog. Use 2D art, a 3D model, or both. The 3D model is what appears on the shelf and in inspect. If you only add 2D art, a double-sided plane is created from it. 2D art is also used in the collection list.",
             MessageType.Info);
 
         EditorGUI.BeginChangeCheck();
@@ -102,11 +101,19 @@ public class PhobiaCatalogWindow : EditorWindow
             var description = EditorGUILayout.TextArea(
                 string.IsNullOrEmpty(def.description) ? "" : def.description,
                 GUILayout.MinHeight(36));
+            var art = (Texture)EditorGUILayout.ObjectField("2D Art", def.art, typeof(Texture), false);
+            var model = (GameObject)EditorGUILayout.ObjectField(
+                new GUIContent("3D Model", "Used on the shelf and in inspect. Replaces the generated plane if you assign one."),
+                def.prefab,
+                typeof(GameObject),
+                false);
             if (EditorGUI.EndChangeCheck())
             {
                 Undo.RecordObject(_catalog, "Edit Phobia Details");
                 def.artist = artist;
                 def.description = description;
+                def.art = art;
+                def.prefab = model;
                 EditorUtility.SetDirty(_catalog);
             }
             EditorGUILayout.EndVertical();
@@ -150,7 +157,11 @@ public class PhobiaCatalogWindow : EditorWindow
         EditorGUILayout.EndHorizontal();
 
         _rarity = (Rarity)EditorGUILayout.EnumPopup("Rarity", _rarity);
-        var artObj = EditorGUILayout.ObjectField("Art", _art, typeof(Object), false);
+        var artObj = EditorGUILayout.ObjectField(
+            new GUIContent("2D Art", "Used in the collection list. If no 3D model is set, a double-sided plane is generated from this."),
+            _art,
+            typeof(Object),
+            false);
         if (artObj is Texture texture)
             _art = texture;
         else if (artObj is Sprite sprite)
@@ -158,7 +169,7 @@ public class PhobiaCatalogWindow : EditorWindow
         else if (artObj == null)
             _art = null;
         _existingPrefab = (GameObject)EditorGUILayout.ObjectField(
-            new GUIContent("Prefab", "Optional. Leave empty to generate a cube prefab from the art and rarity color."),
+            new GUIContent("3D Model", "Prefab or FBX for the shelf and inspect popup. Leave empty to use a plane made from the 2D art."),
             _existingPrefab,
             typeof(GameObject),
             false);
@@ -204,6 +215,12 @@ public class PhobiaCatalogWindow : EditorWindow
         if (FindIndex(id) >= 0)
         {
             reason = $"Id '{id}' is already in the catalog.";
+            return false;
+        }
+
+        if (_existingPrefab == null && _art == null)
+        {
+            reason = "Add 2D art or a 3D model.";
             return false;
         }
 
@@ -285,6 +302,71 @@ public class PhobiaCatalogWindow : EditorWindow
         if (mat == null)
             return null;
 
+        ApplyArtMaterial(mat, art, rarity);
+        EditorUtility.SetDirty(mat);
+
+        var prefabPath = $"{folder}/{id}.prefab";
+        var existing = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+        GameObject contents;
+        if (existing != null)
+            contents = PrefabUtility.LoadPrefabContents(prefabPath);
+        else
+            contents = CreateCardObject();
+
+        contents.name = displayName;
+        ApplyCardShape(contents, rarity);
+        if (contents.TryGetComponent<Renderer>(out var renderer))
+            renderer.sharedMaterial = mat;
+
+        if (existing != null)
+        {
+            PrefabUtility.SaveAsPrefabAsset(contents, prefabPath);
+            PrefabUtility.UnloadPrefabContents(contents);
+        }
+        else
+        {
+            PrefabUtility.SaveAsPrefabAsset(contents, prefabPath);
+            Object.DestroyImmediate(contents);
+        }
+
+        return AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+    }
+
+    static GameObject CreateCardObject()
+    {
+        var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        if (go.TryGetComponent<Collider>(out var collider))
+            Object.DestroyImmediate(collider);
+        return go;
+    }
+
+    static void ApplyCardShape(GameObject go, Rarity rarity)
+    {
+        var height = rarity == Rarity.Legendary ? 0.78f : 0.64f;
+        go.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+        go.transform.localScale = new Vector3(height * 0.75f, height, 1f);
+
+        var mesh = BuiltinQuad();
+        if (mesh != null && go.TryGetComponent<MeshFilter>(out var filter))
+            filter.sharedMesh = mesh;
+        if (go.TryGetComponent<Collider>(out var collider))
+            Object.DestroyImmediate(collider);
+    }
+
+    static Mesh BuiltinQuad()
+    {
+        var temp = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        var mesh = temp.TryGetComponent<MeshFilter>(out var filter) ? filter.sharedMesh : null;
+        Object.DestroyImmediate(temp);
+        return mesh;
+    }
+
+    static void ApplyArtMaterial(Material mat, Texture art, Rarity rarity)
+    {
+        var unlit = Shader.Find("Universal Render Pipeline/Unlit");
+        if (unlit != null)
+            mat.shader = unlit;
+
         var color = art != null ? Color.white : RarityStyle.Color(rarity);
         if (mat.HasProperty("_BaseColor"))
             mat.SetColor("_BaseColor", color);
@@ -294,46 +376,20 @@ public class PhobiaCatalogWindow : EditorWindow
             mat.SetTexture("_BaseMap", art);
         if (mat.HasProperty("_MainTex"))
             mat.SetTexture("_MainTex", art);
-        if (mat.HasProperty("_EmissionColor"))
+        if (mat.HasProperty("_Cull"))
+            mat.SetFloat("_Cull", 0f);
+        mat.doubleSidedGI = true;
+
+        if (art != null)
         {
-            mat.EnableKeyword("_EMISSION");
-            mat.SetColor("_EmissionColor", RarityStyle.Color(rarity) * 0.35f);
+            if (mat.HasProperty("_AlphaClip"))
+                mat.SetFloat("_AlphaClip", 1f);
+            if (mat.HasProperty("_Cutoff"))
+                mat.SetFloat("_Cutoff", 0.2f);
+            mat.EnableKeyword("_ALPHATEST_ON");
+            mat.SetOverrideTag("RenderType", "TransparentCutout");
+            mat.renderQueue = 2450;
         }
-
-        EditorUtility.SetDirty(mat);
-
-        var prefabPath = $"{folder}/{id}.prefab";
-        var existing = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-        GameObject contents;
-        if (existing != null)
-            contents = PrefabUtility.LoadPrefabContents(prefabPath);
-        else if (AssetDatabase.CopyAsset(TemplatePrefab, prefabPath))
-            contents = PrefabUtility.LoadPrefabContents(prefabPath);
-        else
-        {
-            contents = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            if (contents.TryGetComponent<Collider>(out var collider))
-                DestroyImmediate(collider);
-        }
-
-        contents.name = displayName;
-        var scale = rarity == Rarity.Legendary ? 0.34f : 0.26f;
-        contents.transform.localScale = Vector3.one * scale;
-        if (contents.TryGetComponent<Renderer>(out var renderer))
-            renderer.sharedMaterial = mat;
-
-        if (existing != null || AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath) != null)
-        {
-            PrefabUtility.SaveAsPrefabAsset(contents, prefabPath);
-            PrefabUtility.UnloadPrefabContents(contents);
-        }
-        else
-        {
-            PrefabUtility.SaveAsPrefabAsset(contents, prefabPath);
-            DestroyImmediate(contents);
-        }
-
-        return AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
     }
 
     void RemoveAt(int index)
