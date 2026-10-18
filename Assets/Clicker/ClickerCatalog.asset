@@ -59,7 +59,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 951c054741682644fb8dac89c9dddb31, type: 3}
     prefab: {fileID: 1194536141242494251, guid: 4de9f24878f8b22448d738a48a9b4049, type: 3}
     artist: Paige
-    description: 
+    description: Oh, how the turned tables. Put a frowning clown to the job.
     notes: 
   - id: pyrophobia
     displayName: Pyrophobia
@@ -67,7 +67,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 850aefd911fcd3a4d890edbcaa9204d0, type: 3}
     prefab: {fileID: 1194536141242494251, guid: ba60c35e40c68ca47b4f1ce775247581, type: 3}
     artist: Jadyn
-    description: 
+    description: Ironically chill for a hothead, no?
     notes: 
   - id: chionophobia
     displayName: Chionophobia
@@ -75,7 +75,8 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 5e72cfb554963fc4e9206713c1bf10af, type: 3}
     prefab: {fileID: 1194536141242494251, guid: 4179b7fc6a2e9f44997bc6d87801ecf8, type: 3}
     artist: Paige
-    description: 
+    description: This night brings goosebumps. Is he really as cold as they say or
+      is it ironic?
     notes: 
   - id: anthophobia
     displayName: Anthophobia
@@ -91,7 +92,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: e22691ac10870dc42af40803f1994773, type: 3}
     prefab: {fileID: 3634609522488056024, guid: 397badb6d49ee4644bfea26f861b9fae, type: 3}
     artist: Ryan
-    description: 
+    description: BATH DELIVERY. It's bubble-ievable
     notes: 
   - id: canivalphobia
     displayName: Canivalphobia
@@ -115,7 +116,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 00e7e04e3a7abdf43b496fea7a1bffbc, type: 3}
     prefab: {fileID: 5410346379870428264, guid: f0ada7cab1d60044daa26655f4f9634a, type: 3}
     artist: Jadyn
-    description: 
+    description: Now say ahhhhhh
     notes: 
   - id: musophobia
     displayName: Musophobia
