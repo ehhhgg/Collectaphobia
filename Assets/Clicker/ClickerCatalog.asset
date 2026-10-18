@@ -66,7 +66,7 @@ MonoBehaviour:
     rarity: 1
     art: {fileID: 2800000, guid: 850aefd911fcd3a4d890edbcaa9204d0, type: 3}
     prefab: {fileID: 1194536141242494251, guid: ba60c35e40c68ca47b4f1ce775247581, type: 3}
-    artist: 
+    artist: Jadyn
     description: 
     notes: 
   - id: chionophobia
@@ -74,17 +74,96 @@ MonoBehaviour:
     rarity: 2
     art: {fileID: 2800000, guid: 5e72cfb554963fc4e9206713c1bf10af, type: 3}
     prefab: {fileID: 1194536141242494251, guid: 4179b7fc6a2e9f44997bc6d87801ecf8, type: 3}
+    artist: Paige
+    description: 
+    notes: 
+  - id: anthophobia
+    displayName: Anthophobia
+    rarity: 1
+    art: {fileID: 2800000, guid: acf6fbb0ac835564bb5bb08ec38894e7, type: 3}
+    prefab: {fileID: 3642706640357103728, guid: 499c3ea333d426d42b262f615b237c67, type: 3}
+    artist: Andrew
+    description: 
+    notes: 
+  - id: ablutophobia
+    displayName: Ablutophobia
+    rarity: 4
+    art: {fileID: 2800000, guid: e22691ac10870dc42af40803f1994773, type: 3}
+    prefab: {fileID: 3634609522488056024, guid: 397badb6d49ee4644bfea26f861b9fae, type: 3}
+    artist: Ryan
+    description: 
+    notes: 
+  - id: canivalphobia
+    displayName: Canivalphobia
+    rarity: 3
+    art: {fileID: 2800000, guid: 624b66f512905cf4f8ece3f6b71435f0, type: 3}
+    prefab: {fileID: 85402292314405781, guid: 03835eaeb6b192746aebedc7ed656825, type: 3}
+    artist: Andrew
+    description: 
+    notes: 
+  - id: chronomentrophobia
+    displayName: Chronomentrophobia
+    rarity: 3
+    art: {fileID: 2800000, guid: 34b22f70c05a6894d9a29cdf9e8af191, type: 3}
+    prefab: {fileID: 7013334457655728720, guid: 9afb25ece0f637f4e860ac3b8a3f62f8, type: 3}
     artist: 
+    description: 
+    notes: 
+  - id: dentophobia
+    displayName: Dentophobia
+    rarity: 0
+    art: {fileID: 2800000, guid: 00e7e04e3a7abdf43b496fea7a1bffbc, type: 3}
+    prefab: {fileID: 5410346379870428264, guid: f0ada7cab1d60044daa26655f4f9634a, type: 3}
+    artist: Jadyn
+    description: 
+    notes: 
+  - id: musophobia
+    displayName: Musophobia
+    rarity: 0
+    art: {fileID: 2800000, guid: f525d93ccac285f448fa6e69566bcd5f, type: 3}
+    prefab: {fileID: 5118062157546847804, guid: 541a5e682e156ce4cb5e268bebeb9a28, type: 3}
+    artist: Paige
+    description: 
+    notes: 
+  - id: pediaphobia
+    displayName: Pediaphobia
+    rarity: 4
+    art: {fileID: 2800000, guid: 7732f32807aae404ebf116faf0b0e599, type: 3}
+    prefab: {fileID: 1878794337509686517, guid: d7de767262a78a14d8a836092ceca373, type: 3}
+    artist: Paige
+    description: 
+    notes: 
+  - id: phasmophobia
+    displayName: Phasmophobia
+    rarity: 0
+    art: {fileID: 2800000, guid: 105e38118b274394ca59c555b50d39ad, type: 3}
+    prefab: {fileID: 1115523386803954613, guid: ec8f99b60107c974e84227f103698fc8, type: 3}
+    artist: Jadyn
+    description: 
+    notes: 
+  - id: robotophobia
+    displayName: Robotophobia
+    rarity: 1
+    art: {fileID: 2800000, guid: d3f4050f0efdb3443b4ac0cd48cdd6a1, type: 3}
+    prefab: {fileID: 5364724626811562650, guid: 5aa95df1cfd93404f81308f6768108d0, type: 3}
+    artist: Jose
+    description: 
+    notes: 
+  - id: thalassophobia
+    displayName: Thalassophobia
+    rarity: 1
+    art: {fileID: 2800000, guid: 6593552be38332d41809722ee19787db, type: 3}
+    prefab: {fileID: 5608036746083880643, guid: 1a8f1c774a5404345930bf3409383571, type: 3}
+    artist: Jose
     description: 
     notes: 
   - id: batrachophobia
     displayName: Batrachophobia
     rarity: 0
     art: {fileID: 2800000, guid: 56da382f1980c794698397d471a80319, type: 3}
-    prefab: {fileID: 1194536141242494251, guid: a7a392abddf278241ad3dda0141eece3, type: 3}
-    artist: Artist Name
-    description: If avaiable input it in... Uhh Ribbit Ribbit I hope and you hate
-      me.
+    prefab: {fileID: 3909598737517654052, guid: a7a392abddf278241ad3dda0141eece3, type: 3}
+    artist: Jadyn
+    description: 
     notes: 
   autoClickers:
   - id: flicker
