@@ -35,16 +35,11 @@ public class ClickerGame : MonoBehaviour
             return;
 
         _autoBank += cps * Time.deltaTime;
-        var autoPulse = false;
         while (_autoBank >= 1f)
         {
             _autoBank -= 1f;
             RegisterClick();
-            autoPulse = true;
         }
-
-        if (autoPulse)
-            world.PulseAutoClickers();
     }
 
     public void ManualClick()
@@ -86,8 +81,6 @@ public class ClickerGame : MonoBehaviour
 
     public void AfterSaveRestored()
     {
-        if (world != null)
-            world.RefreshAutoClickers(State);
         Notify();
     }
 
@@ -98,10 +91,7 @@ public class ClickerGame : MonoBehaviour
         State.Clear();
         State.ClicksUntilRelic = RollRelicThreshold();
         if (world != null)
-        {
             world.ClearDrops();
-            world.RefreshAutoClickers(State);
-        }
 
         Notify();
     }
@@ -118,7 +108,6 @@ public class ClickerGame : MonoBehaviour
 
         State.Courage -= cost;
         State.AddAuto(def.id);
-        world.RefreshAutoClickers(State);
         Notify();
         return true;
     }
