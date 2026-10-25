@@ -2,21 +2,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CollectionScreen : MonoBehaviour
+public class CollectionScreen : MonoBehaviour, IPhobiaRowHost
 {
     [SerializeField] ClickerGame game;
     [Header("Scene UI")]
     [SerializeField] GameObject overlay;
     [SerializeField] Button openButton;
     [SerializeField] Button closeButton;
+    [SerializeField] Button workButton;
+    [SerializeField] Button mergeButton;
+    [SerializeField] Image mergeImage;
+    [SerializeField] Text mergeLabel;
+    [SerializeField] WorkScreen workScreen;
+    [SerializeField] GameObject mergeConfirm;
+    [SerializeField] Text mergeConfirmMessage;
+    [SerializeField] Button mergeConfirmButton;
+    [SerializeField] Button mergeCancelButton;
     [SerializeField] Text collectionTab;
     [SerializeField] Text progressText;
     [SerializeField] RectTransform content;
     [SerializeField] Text emptyText;
-    [SerializeField] Text detailText;
-    [SerializeField] Text actionLabel;
-    [SerializeField] Button actionButton;
-    [SerializeField] Image actionImage;
 
     readonly List<CollectionRow> _rows = new();
     string _selectedId;
@@ -49,9 +54,12 @@ public class CollectionScreen : MonoBehaviour
     void Update()
     {
         if (_open)
-            RefreshMissionUi();
-        else
-            RefreshTab();
+        {
+            RefreshRows();
+            RefreshMerge();
+        }
+
+        RefreshTab();
     }
 
     public void Open()
@@ -69,9 +77,20 @@ public class CollectionScreen : MonoBehaviour
     public void Close()
     {
         _open = false;
+        if (workScreen != null)
+            workScreen.Close();
+        HideMergeConfirm();
         if (overlay != null)
             overlay.SetActive(false);
         RefreshTab();
+    }
+
+    public void OpenWork()
+    {
+        if (!_open)
+            Open();
+        if (workScreen != null)
+            workScreen.Open(_selectedId);
     }
 
     public void Select(string id)
@@ -97,6 +116,9 @@ public class CollectionScreen : MonoBehaviour
         if (game == null)
             return;
 
+        if (!string.IsNullOrEmpty(_selectedId) && game.State.PhobiaCount(_selectedId) <= 0)
+            _selectedId = null;
+
         var catalog = game.Catalog;
         var total = catalog != null && catalog.phobias != null ? catalog.phobias.Length : 0;
         var unlocked = 0;
@@ -112,19 +134,25 @@ public class CollectionScreen : MonoBehaviour
         if (progressText != null)
             progressText.text = $"{unlocked} / {total} unlocked";
 
-        foreach (var row in _rows)
-            RefreshRow(row, catalog);
+        RefreshRows();
+        RefreshMerge();
 
         if (emptyText != null)
             emptyText.gameObject.SetActive(total == 0);
 
-        RefreshMissionUi();
         RefreshTab();
+    }
+
+    void RefreshRows()
+    {
+        var catalog = game != null ? game.Catalog : null;
+        foreach (var row in _rows)
+            RefreshRow(row, catalog);
     }
 
     void RefreshRow(CollectionRow row, ClickerCatalog catalog)
     {
-        if (row == null)
+        if (row == null || game == null)
             return;
 
         var def = catalog != null ? catalog.PhobiaById(row.phobiaId) : null;
@@ -159,7 +187,8 @@ public class CollectionScreen : MonoBehaviour
             }
             else if (mission != null)
             {
-                row.rarityText.text = $"GATHERING  {MissionRules.FormatRemaining(mission.Remaining)}";
+                var job = MissionRules.JobById(mission.missionId);
+                row.rarityText.text = $"{job.displayName.ToUpper()}  {MissionRules.FormatRemaining(mission.Remaining)}";
                 row.rarityText.color = color;
             }
             else
@@ -190,56 +219,6 @@ public class CollectionScreen : MonoBehaviour
             row.inspectLabel.color = found ? Color.white : new Color(1f, 1f, 1f, 0.35f);
     }
 
-    void RefreshMissionUi()
-    {
-        if (detailText == null || actionButton == null || game == null)
-            return;
-
-        var def = game.Catalog != null ? game.Catalog.PhobiaById(_selectedId) : null;
-        var owned = def != null && game.State.PhobiaCount(_selectedId) > 0;
-        if (!owned)
-            _selectedId = null;
-
-        var selectedMission = game.State.MissionFor(_selectedId);
-        var slotFull = game.State.Missions.Count >= MissionRules.MaxConcurrent;
-
-        if (def == null || !owned)
-        {
-            detailText.text = "Select an unlocked phobia to send gathering.";
-            SetAction("SEND", false);
-            return;
-        }
-
-        var reward = selectedMission != null
-            ? MissionRules.Reward((Rarity)selectedMission.rarity, selectedMission.collectedAtStart)
-            : game.PreviewGatherReward(_selectedId);
-
-        if (selectedMission != null && selectedMission.IsComplete)
-        {
-            detailText.text = $"{def.Label} is back.\n+{Mathf.FloorToInt((float)reward)} Courage";
-            SetAction("CLAIM", true);
-            return;
-        }
-
-        if (selectedMission != null)
-        {
-            detailText.text = $"{def.Label} is gathering.\n{MissionRules.FormatRemaining(selectedMission.Remaining)} left";
-            SetAction("WAIT", false);
-            return;
-        }
-
-        if (slotFull)
-        {
-            detailText.text = "A phobia is already gathering.\nWait or claim it first.";
-            SetAction("BUSY", false);
-            return;
-        }
-
-        var seconds = (int)MissionRules.GatherDuration.TotalSeconds;
-        detailText.text = $"{def.Label}  ·  {RarityStyle.Label(def.rarity)} ×{game.State.PhobiaCount(def.id)}\nEst. {Mathf.FloorToInt((float)reward)} Courage  ·  {seconds}s";
-        SetAction("SEND", true);
-    }
-
     void RefreshTab()
     {
         if (collectionTab == null || game == null)
@@ -248,34 +227,9 @@ public class CollectionScreen : MonoBehaviour
         if (game.State.FirstCompletableMission() != null)
             collectionTab.text = "CLAIM!";
         else if (game.State.Missions.Count > 0)
-            collectionTab.text = "GATHERING";
+            collectionTab.text = "WORKING";
         else
             collectionTab.text = "COLLECTION";
-    }
-
-    void SetAction(string label, bool enabled)
-    {
-        if (actionLabel != null)
-            actionLabel.text = label;
-        if (actionButton != null)
-            actionButton.interactable = enabled;
-        if (actionImage != null)
-            actionImage.color = enabled ? Accent : new Color(0.3f, 0.28f, 0.34f, 1f);
-    }
-
-    void OnActionPressed()
-    {
-        if (game == null || string.IsNullOrEmpty(_selectedId))
-            return;
-
-        var mission = game.State.MissionFor(_selectedId);
-        if (mission != null && mission.IsComplete)
-        {
-            game.TryClaimMission(_selectedId);
-            return;
-        }
-
-        game.TryStartGather(_selectedId);
     }
 
     void BindChrome()
@@ -284,11 +238,62 @@ public class CollectionScreen : MonoBehaviour
             openButton.onClick.AddListener(Open);
         if (closeButton != null)
             closeButton.onClick.AddListener(Close);
-        if (actionButton != null)
-            actionButton.onClick.AddListener(OnActionPressed);
+        if (workButton != null)
+            workButton.onClick.AddListener(OpenWork);
+        if (mergeButton != null)
+            mergeButton.onClick.AddListener(ShowMergeConfirm);
+        if (mergeConfirmButton != null)
+            mergeConfirmButton.onClick.AddListener(ConfirmMerge);
+        if (mergeCancelButton != null)
+            mergeCancelButton.onClick.AddListener(HideMergeConfirm);
+        HideMergeConfirm();
 
         if (overlay == null)
             Debug.LogError("CollectionScreen has no overlay in the scene. Run Phobia/Sync Collection Screen.", this);
+    }
+
+    public void ShowMergeConfirm()
+    {
+        if (game == null || !game.CanMerge(_selectedId, out var reason))
+        {
+            if (game != null)
+                game.TryMerge(_selectedId);
+            return;
+        }
+
+        var def = game.Catalog.PhobiaById(_selectedId);
+        MergeRules.TryNextRarity(def.rarity, out var next);
+        if (mergeConfirmMessage != null)
+            mergeConfirmMessage.text = $"Merge {MergeRules.Cost} {def.Label} into a random {RarityStyle.Label(next)}?";
+        if (mergeConfirm != null)
+        {
+            mergeConfirm.SetActive(true);
+            mergeConfirm.transform.SetAsLastSibling();
+        }
+    }
+
+    public void ConfirmMerge()
+    {
+        HideMergeConfirm();
+        if (game != null)
+            game.TryMerge(_selectedId);
+    }
+
+    public void HideMergeConfirm()
+    {
+        if (mergeConfirm != null)
+            mergeConfirm.SetActive(false);
+    }
+
+    void RefreshMerge()
+    {
+        var can = game != null && game.CanMerge(_selectedId, out _);
+        if (mergeButton != null)
+            mergeButton.interactable = can;
+        if (mergeImage != null)
+            mergeImage.color = can ? Accent : new Color(0.3f, 0.28f, 0.34f, 1f);
+        if (mergeLabel != null)
+            mergeLabel.text = "MERGE";
     }
 
     void CacheRows()
@@ -307,6 +312,9 @@ public class CollectionScreen : MonoBehaviour
             if (found != null)
                 overlay = found.gameObject;
         }
+
+        if (workScreen == null)
+            workScreen = GetComponentInChildren<WorkScreen>(true);
 
         if (openButton == null)
         {
@@ -339,14 +347,35 @@ public class CollectionScreen : MonoBehaviour
 
         if (emptyText == null)
             emptyText = FindNamed<Text>(overlayTransform, "Panel/Viewport/Empty");
-        if (detailText == null)
-            detailText = FindNamed<Text>(overlayTransform, "Panel/MissionBar/Detail");
-        if (actionButton == null)
-            actionButton = FindNamed<Button>(overlayTransform, "Panel/MissionBar/Action");
-        if (actionImage == null && actionButton != null)
-            actionImage = actionButton.GetComponent<Image>();
-        if (actionLabel == null)
-            actionLabel = FindNamed<Text>(overlayTransform, "Panel/MissionBar/Action/Label");
+        if (workButton == null)
+        {
+            workButton = FindNamed<Button>(overlayTransform, "Panel/Work");
+            if (workButton == null)
+                workButton = FindNamed<Button>(overlayTransform, "Panel/MissionBar/Action");
+        }
+
+        if (mergeButton == null)
+            mergeButton = FindNamed<Button>(overlayTransform, "Panel/Merge");
+        if (mergeImage == null && mergeButton != null)
+            mergeImage = mergeButton.GetComponent<Image>();
+        if (mergeLabel == null && mergeButton != null)
+            mergeLabel = FindNamed<Text>(mergeButton.transform, "Label");
+        if (mergeConfirm == null)
+        {
+            var confirm = overlayTransform.Find("MergeConfirm");
+            if (confirm != null)
+                mergeConfirm = confirm.gameObject;
+        }
+
+        if (mergeConfirm != null)
+        {
+            if (mergeConfirmMessage == null)
+                mergeConfirmMessage = FindNamed<Text>(mergeConfirm.transform, "Panel/Message");
+            if (mergeConfirmButton == null)
+                mergeConfirmButton = FindNamed<Button>(mergeConfirm.transform, "Panel/Confirm");
+            if (mergeCancelButton == null)
+                mergeCancelButton = FindNamed<Button>(mergeConfirm.transform, "Panel/Cancel");
+        }
     }
 
     static T FindNamed<T>(Transform root, string path) where T : Component

@@ -10,6 +10,7 @@ public static class CollectionScreenSync
 {
     const string CatalogPath = "Assets/Clicker/ClickerCatalog.asset";
     const string RowPrefabPath = "Assets/Clicker/Prefabs/CollectionRow.prefab";
+    const string JobPrefabPath = "Assets/Clicker/Prefabs/WorkJobOption.prefab";
     const string PrefabFolder = "Assets/Clicker/Prefabs";
 
     static readonly Color Accent = new(0.95f, 0.42f, 0.55f);
@@ -32,7 +33,7 @@ public static class CollectionScreenSync
         }
 
         foreach (var screen in screens)
-            SyncScreen(screen, catalog);
+            SyncScreen(screen, catalog, warn: true);
 
         Debug.Log($"Collection screen synced ({screens.Count} scene{(screens.Count == 1 ? "" : "s")}).");
     }
@@ -76,16 +77,27 @@ public static class CollectionScreenSync
 
     static bool NeedsSync(CollectionScreen screen, ClickerCatalog catalog)
     {
-        var so = new SerializedObject(screen);
-        var overlay = so.FindProperty("overlay")?.objectReferenceValue as GameObject;
-        if (overlay == null)
+        var wanted = SortedPhobias(catalog);
+        var overlay = FindChild(screen.transform, "CollectionOverlay");
+        var content = FindContent(screen, overlay);
+        if (content != null && !IdsMatch(content, wanted))
             return true;
 
-        var content = so.FindProperty("content")?.objectReferenceValue as RectTransform
-            ?? overlay.transform.Find("Panel/Viewport/Content") as RectTransform;
-        if (content == null)
+        var work = screen.GetComponentInChildren<WorkScreen>(true);
+        if (work == null)
+            return false;
+
+        var workContent = work.transform.Find("Panel/Viewport/Content") as RectTransform;
+        if (workContent != null && !IdsMatch(workContent, wanted))
             return true;
 
+        var jobsRoot = work.transform.Find("Panel/Jobs");
+        return jobsRoot != null
+            && jobsRoot.GetComponentsInChildren<WorkJobOption>(true).Length != MissionRules.Jobs.Length;
+    }
+
+    static bool IdsMatch(RectTransform content, List<PhobiaDefinition> wanted)
+    {
         var ids = new HashSet<string>();
         foreach (var row in content.GetComponentsInChildren<CollectionRow>(true))
         {
@@ -93,95 +105,214 @@ public static class CollectionScreenSync
                 ids.Add(row.phobiaId);
         }
 
-        var wanted = SortedPhobias(catalog);
         if (ids.Count != wanted.Count)
-            return true;
+            return false;
         foreach (var def in wanted)
         {
             if (!ids.Contains(def.id))
-                return true;
+                return false;
         }
 
-        return false;
+        return true;
     }
 
-    static void SyncScreen(CollectionScreen screen, ClickerCatalog catalog)
+    static void SyncScreen(CollectionScreen screen, ClickerCatalog catalog, bool warn = false)
     {
         if (screen == null)
             return;
 
         Undo.RegisterFullObjectHierarchyUndo(screen.gameObject, "Sync Collection Screen");
-        EnsureChrome(screen);
-        EnsureOverlay(screen);
+        BindSceneRefs(screen, warn);
         EnsureRows(screen, catalog);
+        EnsureWorkRows(screen, catalog);
         EditorUtility.SetDirty(screen);
         EditorSceneManager.MarkSceneDirty(screen.gameObject.scene);
     }
 
-    static void EnsureChrome(CollectionScreen screen)
+    static void BindSceneRefs(CollectionScreen screen, bool warn)
     {
-        var inventory = screen.transform.Find("Inventory");
-        if (inventory == null)
-            return;
-
-        if (inventory.TryGetComponent<Image>(out var image))
-            image.raycastTarget = true;
-
-        var button = inventory.GetComponent<Button>();
-        if (button == null)
-            button = Undo.AddComponent<Button>(inventory.gameObject);
-        button.transition = Selectable.Transition.None;
-        button.targetGraphic = image;
-
-        var so = new SerializedObject(screen);
-        so.FindProperty("openButton").objectReferenceValue = button;
-        var label = inventory.Find("RelicsLabel");
-        if (label != null && label.TryGetComponent<Text>(out var tab))
-        {
-            so.FindProperty("collectionTab").objectReferenceValue = tab;
-            if (tab.text == "RELICS" || string.IsNullOrEmpty(tab.text))
-                tab.text = "COLLECTION";
-        }
-
-        so.ApplyModifiedPropertiesWithoutUndo();
+        BindCollection(screen, warn);
+        BindWork(screen, warn);
+        BindExit(screen, warn);
+        BindReveal(screen, warn);
     }
 
-    static void EnsureOverlay(CollectionScreen screen)
+    static void BindCollection(CollectionScreen screen, bool warn)
     {
-        var so = new SerializedObject(screen);
-        var overlayProp = so.FindProperty("overlay");
-        if (overlayProp == null)
-            return;
-
-        var overlay = overlayProp.objectReferenceValue as GameObject;
+        var overlay = FindChild(screen.transform, "CollectionOverlay");
         if (overlay == null)
         {
-            var existing = screen.transform.Find("CollectionOverlay");
-            overlay = existing != null ? existing.gameObject : BuildOverlay(screen.transform);
+            if (warn)
+                Debug.LogWarning("HUD is missing CollectionOverlay. Edit it in the scene; sync will not recreate chrome.", screen);
+            return;
         }
 
-        overlay.transform.SetAsLastSibling();
+        var so = new SerializedObject(screen);
+        so.FindProperty("overlay").objectReferenceValue = overlay;
 
-        overlayProp.objectReferenceValue = overlay;
+        var inventory = screen.transform.Find("Inventory");
+        if (inventory != null)
+        {
+            AssignIfNull(so, "openButton", inventory.GetComponent<Button>());
+            var label = inventory.Find("RelicsLabel");
+            if (label != null)
+                AssignIfNull(so, "collectionTab", label.GetComponent<Text>());
+        }
+
         AssignIfNull(so, "closeButton", FindNamed<Button>(overlay.transform, "Panel/Close"));
         AssignIfNull(so, "progressText", FindNamed<Text>(overlay.transform, "Panel/Progress"));
         var content = overlay.transform.Find("Panel/Viewport/Content") as RectTransform;
         if (so.FindProperty("content").objectReferenceValue == null)
             so.FindProperty("content").objectReferenceValue = content;
         AssignIfNull(so, "emptyText", FindNamed<Text>(overlay.transform, "Panel/Viewport/Empty"));
-        AssignIfNull(so, "detailText", FindNamed<Text>(overlay.transform, "Panel/MissionBar/Detail"));
-        var action = FindNamed<Button>(overlay.transform, "Panel/MissionBar/Action");
-        AssignIfNull(so, "actionButton", action);
-        if (action != null)
-            AssignIfNull(so, "actionImage", action.GetComponent<Image>());
-        AssignIfNull(so, "actionLabel", FindNamed<Text>(overlay.transform, "Panel/MissionBar/Action/Label"));
+
+        var work = overlay.transform.Find("Panel/Work") ?? overlay.transform.Find("Panel/MissionBar/Action");
+        if (work != null)
+            AssignIfNull(so, "workButton", work.GetComponent<Button>());
+
+        var merge = overlay.transform.Find("Panel/Merge");
+        if (merge != null)
+        {
+            AssignIfNull(so, "mergeButton", merge.GetComponent<Button>());
+            AssignIfNull(so, "mergeImage", merge.GetComponent<Image>());
+            AssignIfNull(so, "mergeLabel", FindNamed<Text>(merge, "Label"));
+        }
+        else if (warn)
+        {
+            Debug.LogWarning("CollectionOverlay is missing Panel/Merge.", overlay);
+        }
+
+        var confirm = overlay.transform.Find("MergeConfirm");
+        if (confirm != null)
+        {
+            AssignIfNull(so, "mergeConfirm", confirm.gameObject);
+            AssignIfNull(so, "mergeConfirmMessage", FindNamed<Text>(confirm, "Panel/Message"));
+            AssignIfNull(so, "mergeConfirmButton", FindNamed<Button>(confirm, "Panel/Confirm"));
+            AssignIfNull(so, "mergeCancelButton", FindNamed<Button>(confirm, "Panel/Cancel"));
+        }
+        else if (warn)
+        {
+            Debug.LogWarning("CollectionOverlay is missing MergeConfirm.", overlay);
+        }
+
         so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    static void BindWork(CollectionScreen screen, bool warn)
+    {
+        var existing = screen.transform.Find("WorkOverlay");
+        if (existing == null)
+        {
+            if (warn)
+                Debug.LogWarning("HUD is missing WorkOverlay. Edit it in the scene; sync will not recreate chrome.", screen);
+            return;
+        }
+
+        var overlay = existing.gameObject;
+        var work = overlay.GetComponent<WorkScreen>();
+        if (work == null)
+        {
+            if (warn)
+                Debug.LogWarning("WorkOverlay has no WorkScreen component.", overlay);
+            return;
+        }
+
+        var restored = false;
+        if (!overlay.activeSelf)
+        {
+            overlay.SetActive(true);
+            restored = true;
+        }
+
+        try
+        {
+            EnsureJobCards(overlay.transform.Find("Panel/Jobs"));
+        }
+        finally
+        {
+            if (restored)
+                overlay.SetActive(false);
+        }
+
+        var collectionSo = new SerializedObject(screen);
+        var workSo = new SerializedObject(work);
+        if (workSo.FindProperty("game").objectReferenceValue == null)
+            workSo.FindProperty("game").objectReferenceValue = collectionSo.FindProperty("game")?.objectReferenceValue;
+        workSo.FindProperty("overlay").objectReferenceValue = overlay;
+        AssignIfNull(workSo, "closeButton", FindNamed<Button>(overlay.transform, "Panel/Close"));
+        AssignIfNull(workSo, "statusText", FindNamed<Text>(overlay.transform, "Panel/Status"));
+        var content = overlay.transform.Find("Panel/Viewport/Content") as RectTransform;
+        if (workSo.FindProperty("content").objectReferenceValue == null)
+            workSo.FindProperty("content").objectReferenceValue = content;
+        AssignIfNull(workSo, "emptyText", FindNamed<Text>(overlay.transform, "Panel/Viewport/Empty"));
+        var jobProp = workSo.FindProperty("jobs");
+        if (jobProp != null)
+        {
+            var options = overlay.GetComponentsInChildren<WorkJobOption>(true);
+            jobProp.arraySize = options.Length;
+            for (var i = 0; i < options.Length; i++)
+                jobProp.GetArrayElementAtIndex(i).objectReferenceValue = options[i];
+        }
+
+        workSo.ApplyModifiedPropertiesWithoutUndo();
+        AssignIfNull(collectionSo, "workScreen", work);
+        collectionSo.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(work);
+    }
+
+    static void BindExit(CollectionScreen screen, bool warn)
+    {
+        var exit = screen.transform.Find("Exit");
+        if (exit == null)
+        {
+            if (warn)
+                Debug.LogWarning("HUD is missing Exit. Edit it in the scene; sync will not recreate chrome.", screen);
+            return;
+        }
+
+        var hud = screen.GetComponent<ClickerHud>();
+        if (hud == null)
+            return;
+
+        var so = new SerializedObject(hud);
+        AssignIfNull(so, "exitButton", exit.GetComponent<Button>());
+        so.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(hud);
+    }
+
+    static void BindReveal(CollectionScreen screen, bool warn)
+    {
+        var reveal = screen.GetComponent<PhobiaReveal>();
+        var overlay = FindChild(screen.transform, "PhobiaReveal");
+        if (reveal == null || overlay == null)
+        {
+            if (warn)
+                Debug.LogWarning("HUD is missing PhobiaReveal overlay. Edit it in the scene; sync will not recreate chrome.", screen);
+            return;
+        }
+
+        var so = new SerializedObject(reveal);
+        var gameSo = new SerializedObject(screen);
+        if (so.FindProperty("game") != null && so.FindProperty("game").objectReferenceValue == null)
+            so.FindProperty("game").objectReferenceValue = gameSo.FindProperty("game")?.objectReferenceValue;
+        so.FindProperty("overlay").objectReferenceValue = overlay;
+        AssignIfNull(so, "bannerText", FindNamed<Text>(overlay.transform, "Banner"));
+        AssignIfNull(so, "nameText", FindNamed<Text>(overlay.transform, "Name"));
+        AssignIfNull(so, "rarityText", FindNamed<Text>(overlay.transform, "Rarity"));
+        AssignIfNull(so, "artistText", FindNamed<Text>(overlay.transform, "Artist"));
+        AssignIfNull(so, "descriptionText", FindNamed<Text>(overlay.transform, "Description"));
+        AssignIfNull(so, "modelView", FindNamed<RawImage>(overlay.transform, "ModelView"));
+        AssignIfNull(so, "artView", FindNamed<RawImage>(overlay.transform, "Art"));
+        AssignIfNull(so, "closeButton", FindNamed<Button>(overlay.transform, "Close"));
+        so.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(reveal);
     }
 
     static void EnsureRows(CollectionScreen screen, ClickerCatalog catalog)
     {
         var so = new SerializedObject(screen);
-        var overlay = so.FindProperty("overlay")?.objectReferenceValue as GameObject;
+        var overlay = so.FindProperty("overlay")?.objectReferenceValue as GameObject
+            ?? FindChild(screen.transform, "CollectionOverlay");
         var content = so.FindProperty("content")?.objectReferenceValue as RectTransform;
         var empty = so.FindProperty("emptyText")?.objectReferenceValue as Text;
         if (content == null && overlay != null)
@@ -205,58 +336,96 @@ public static class CollectionScreenSync
 
         try
         {
-            var rows = new List<CollectionRow>(content.GetComponentsInChildren<CollectionRow>(true));
-            var byId = new Dictionary<string, CollectionRow>();
-            foreach (var row in rows)
-            {
-                if (row == null)
-                    continue;
-                if (string.IsNullOrEmpty(row.phobiaId))
-                    continue;
-                if (byId.ContainsKey(row.phobiaId))
-                {
-                    DestroyRow(row);
-                    continue;
-                }
-
-                byId[row.phobiaId] = row;
-            }
-
-            var prefab = EnsureRowPrefab();
-            for (var i = 0; i < wanted.Count; i++)
-            {
-                var def = wanted[i];
-                if (!byId.TryGetValue(def.id, out var row) || row == null)
-                {
-                    row = InstantiateRow(prefab, content);
-                    if (row == null)
-                    {
-                        Debug.LogError($"Could not create collection row for '{def.id}'.", content);
-                        continue;
-                    }
-
-                    byId[def.id] = row;
-                }
-
-                ApplyRow(row, def);
-                row.transform.SetSiblingIndex(i);
-            }
-
-            foreach (var pair in byId)
-            {
-                if (wanted.Exists(def => def.id == pair.Key))
-                    continue;
-                DestroyRow(pair.Value);
-            }
-
-            if (empty != null)
-                empty.gameObject.SetActive(wanted.Count == 0);
+            FillPhobiaRows(content, empty, wanted);
         }
         finally
         {
             if (restoredOverlay)
                 overlay.SetActive(false);
         }
+    }
+
+    static void EnsureWorkRows(CollectionScreen screen, ClickerCatalog catalog)
+    {
+        var work = screen.GetComponentInChildren<WorkScreen>(true);
+        if (work == null)
+            return;
+
+        var overlay = work.gameObject;
+        var content = overlay.transform.Find("Panel/Viewport/Content") as RectTransform;
+        var empty = FindNamed<Text>(overlay.transform, "Panel/Viewport/Empty");
+        if (content == null)
+            return;
+
+        if (catalog == null)
+            catalog = LoadCatalog();
+
+        var restored = false;
+        if (!overlay.activeSelf)
+        {
+            overlay.SetActive(true);
+            restored = true;
+        }
+
+        try
+        {
+            FillPhobiaRows(content, empty, SortedPhobias(catalog));
+        }
+        finally
+        {
+            if (restored)
+                overlay.SetActive(false);
+        }
+    }
+
+    static void FillPhobiaRows(RectTransform content, Text empty, List<PhobiaDefinition> wanted)
+    {
+        var rows = new List<CollectionRow>(content.GetComponentsInChildren<CollectionRow>(true));
+        var byId = new Dictionary<string, CollectionRow>();
+        foreach (var row in rows)
+        {
+            if (row == null)
+                continue;
+            if (string.IsNullOrEmpty(row.phobiaId))
+                continue;
+            if (byId.ContainsKey(row.phobiaId))
+            {
+                DestroyRow(row);
+                continue;
+            }
+
+            byId[row.phobiaId] = row;
+        }
+
+        var prefab = EnsureRowPrefab();
+        for (var i = 0; i < wanted.Count; i++)
+        {
+            var def = wanted[i];
+            if (!byId.TryGetValue(def.id, out var row) || row == null)
+            {
+                row = InstantiateRow(prefab, content);
+                if (row == null)
+                {
+                    Debug.LogError($"Could not create collection row for '{def.id}'.", content);
+                    continue;
+                }
+
+                byId[def.id] = row;
+            }
+
+            ApplyRow(row, def);
+            row.transform.SetSiblingIndex(i);
+        }
+
+        foreach (var pair in byId)
+        {
+            if (wanted.Exists(def => def.id == pair.Key))
+                continue;
+            DestroyRow(pair.Value);
+        }
+
+        if (empty != null)
+            empty.gameObject.SetActive(wanted.Count == 0);
     }
 
     static CollectionRow InstantiateRow(CollectionRow prefab, RectTransform content)
@@ -336,100 +505,149 @@ public static class CollectionScreenSync
         }
     }
 
-    static GameObject BuildOverlay(Transform parent)
+    static void EnsureJobCards(Transform jobsRoot)
     {
-        var overlay = Create("CollectionOverlay", parent);
-        Stretch(overlay);
-        var dim = overlay.gameObject.AddComponent<Image>();
-        dim.color = new Color(0.04f, 0.03f, 0.06f, 0.92f);
-        dim.raycastTarget = true;
+        if (jobsRoot == null)
+            return;
 
-        var panel = Create("Panel", overlay);
-        Stretch(panel, new Vector2(0.06f, 0.08f), new Vector2(0.94f, 0.9f));
-        var panelImage = panel.gameObject.AddComponent<Image>();
-        panelImage.color = new Color(0.07f, 0.06f, 0.12f, 0.98f);
-        panelImage.raycastTarget = true;
+        var prefab = EnsureJobPrefab();
+        var existing = new List<WorkJobOption>(jobsRoot.GetComponentsInChildren<WorkJobOption>(true));
+        var byId = new Dictionary<string, WorkJobOption>();
+        foreach (var option in existing)
+        {
+            if (option == null || string.IsNullOrEmpty(option.jobId) || byId.ContainsKey(option.jobId))
+            {
+                if (option != null)
+                    Undo.DestroyObjectImmediate(option.gameObject);
+                continue;
+            }
 
-        var title = CreateText("Title", panel, "COLLECTION", 36, TextAnchor.MiddleCenter, FontStyle.Bold);
-        title.color = Color.white;
-        Stretch(title.rectTransform, new Vector2(0.08f, 0.91f), new Vector2(0.78f, 1f));
+            byId[option.jobId] = option;
+        }
 
-        var progress = CreateText("Progress", panel, "0 / 0 unlocked", 22, TextAnchor.MiddleLeft);
-        progress.color = new Color(0.7f, 0.68f, 0.76f, 1f);
-        Stretch(progress.rectTransform, new Vector2(0.08f, 0.86f), new Vector2(0.7f, 0.92f));
+        for (var i = 0; i < MissionRules.Jobs.Length; i++)
+        {
+            var def = MissionRules.Jobs[i];
+            if (!byId.TryGetValue(def.id, out var option) || option == null)
+            {
+                option = InstantiateJob(prefab, jobsRoot);
+                byId[def.id] = option;
+            }
 
-        var close = Create("Close", panel);
-        Stretch(close, new Vector2(0.78f, 0.91f), new Vector2(0.98f, 0.99f), new Vector2(-8f, -8f), new Vector2(-8f, -8f));
-        var closeImage = close.gameObject.AddComponent<Image>();
-        closeImage.color = Accent;
-        var closeButton = close.gameObject.AddComponent<Button>();
-        closeButton.targetGraphic = closeImage;
-        var closeLabel = CreateText("Label", close, "CLOSE", 22, TextAnchor.MiddleCenter, FontStyle.Bold);
-        closeLabel.color = Color.white;
-        closeLabel.raycastTarget = false;
-        Stretch(closeLabel.rectTransform);
+            ApplyJob(option, def);
+            option.transform.SetSiblingIndex(i);
+        }
+    }
 
-        var viewport = Create("Viewport", panel);
-        Stretch(viewport, new Vector2(0.04f, 0.24f), new Vector2(0.96f, 0.85f));
-        viewport.gameObject.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.12f);
-        var mask = viewport.gameObject.AddComponent<Mask>();
-        mask.showMaskGraphic = false;
+    static WorkJobOption InstantiateJob(WorkJobOption prefab, Transform parent)
+    {
+        if (prefab != null)
+        {
+            var instance = PrefabUtility.InstantiatePrefab(prefab.gameObject, parent) as GameObject;
+            if (instance != null)
+            {
+                Undo.RegisterCreatedObjectUndo(instance, "Add Work Job");
+                var option = instance.GetComponent<WorkJobOption>();
+                if (option != null)
+                    return option;
+            }
+        }
 
-        var content = Create("Content", viewport);
-        content.anchorMin = new Vector2(0f, 1f);
-        content.anchorMax = new Vector2(1f, 1f);
-        content.pivot = new Vector2(0.5f, 1f);
-        content.anchoredPosition = Vector2.zero;
-        content.sizeDelta = new Vector2(0f, 0f);
-        var layout = content.gameObject.AddComponent<VerticalLayoutGroup>();
-        layout.padding = new RectOffset(8, 8, 8, 8);
-        layout.spacing = 8f;
-        layout.childAlignment = TextAnchor.UpperCenter;
-        layout.childControlWidth = true;
-        layout.childControlHeight = true;
-        layout.childForceExpandWidth = true;
-        layout.childForceExpandHeight = false;
-        var fitter = content.gameObject.AddComponent<ContentSizeFitter>();
-        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        var created = BuildJobTemplate(parent);
+        Undo.RegisterCreatedObjectUndo(created.gameObject, "Add Work Job");
+        return created;
+    }
 
-        var scroll = viewport.gameObject.AddComponent<ScrollRect>();
-        scroll.content = content;
-        scroll.viewport = viewport;
-        scroll.horizontal = false;
-        scroll.vertical = true;
-        scroll.movementType = ScrollRect.MovementType.Clamped;
-        scroll.scrollSensitivity = 24f;
+    static void ApplyJob(WorkJobOption option, JobDefinition def)
+    {
+        if (option == null || def == null)
+            return;
 
-        var empty = CreateText("Empty", viewport, "No phobias in the catalog yet.", 24, TextAnchor.MiddleCenter);
-        empty.color = new Color(1f, 1f, 1f, 0.4f);
-        Stretch(empty.rectTransform);
-        empty.raycastTarget = false;
+        option.gameObject.name = "Job_" + def.id;
+        option.jobId = def.id;
+        if (option.titleText != null)
+            option.titleText.text = def.displayName;
+        if (option.durationText != null)
+            option.durationText.text = def.DurationLabel;
+        if (option.rewardText != null)
+            option.rewardText.text = $"+{Mathf.FloorToInt((float)MissionRules.Reward(Rarity.Common, 1, def.id))}";
+        if (option.sendLabel != null)
+            option.sendLabel.text = "SEND";
+        EditorUtility.SetDirty(option);
+    }
 
-        var action = Create("MissionBar", panel);
-        Stretch(action, new Vector2(0.04f, 0.03f), new Vector2(0.96f, 0.22f));
-        action.gameObject.AddComponent<Image>().color = new Color(0.12f, 0.1f, 0.16f, 1f);
+    static WorkJobOption EnsureJobPrefab()
+    {
+        EnsureFolder(PrefabFolder);
+        var existing = AssetDatabase.LoadAssetAtPath<GameObject>(JobPrefabPath);
+        if (existing != null)
+        {
+            var option = existing.GetComponent<WorkJobOption>();
+            if (option != null)
+                return option;
+        }
 
-        var detail = CreateText("Detail", action, "Select an unlocked phobia to send gathering.", 20, TextAnchor.MiddleLeft);
-        detail.color = new Color(0.86f, 0.84f, 0.9f, 1f);
-        detail.horizontalOverflow = HorizontalWrapMode.Wrap;
-        detail.verticalOverflow = VerticalWrapMode.Overflow;
-        Stretch(detail.rectTransform, new Vector2(0.04f, 0.08f), new Vector2(0.62f, 0.92f));
+        var canvasGo = new GameObject("WorkJobPrefabTemp", typeof(RectTransform), typeof(Canvas));
+        try
+        {
+            var template = BuildJobTemplate(canvasGo.transform);
+            template.gameObject.name = "WorkJobOption";
+            var prefab = PrefabUtility.SaveAsPrefabAsset(template.gameObject, JobPrefabPath);
+            AssetDatabase.SaveAssets();
+            return prefab != null ? prefab.GetComponent<WorkJobOption>() : null;
+        }
+        finally
+        {
+            Object.DestroyImmediate(canvasGo);
+        }
+    }
 
-        var send = Create("Action", action);
-        Stretch(send, new Vector2(0.66f, 0.16f), new Vector2(0.97f, 0.84f));
-        var actionImage = send.gameObject.AddComponent<Image>();
-        actionImage.color = Accent;
-        var actionButton = send.gameObject.AddComponent<Button>();
-        actionButton.targetGraphic = actionImage;
-        var actionLabel = CreateText("Label", send, "SEND", 24, TextAnchor.MiddleCenter, FontStyle.Bold);
-        actionLabel.color = Color.white;
-        actionLabel.raycastTarget = false;
-        Stretch(actionLabel.rectTransform);
+    static WorkJobOption BuildJobTemplate(Transform parent)
+    {
+        var card = Create("WorkJobOption", parent);
+        card.sizeDelta = new Vector2(260f, 180f);
+        var layout = card.gameObject.AddComponent<LayoutElement>();
+        layout.minHeight = 160f;
+        layout.preferredHeight = 180f;
+        layout.minWidth = 200f;
+        var bg = card.gameObject.AddComponent<Image>();
+        bg.color = new Color(0.12f, 0.1f, 0.16f, 1f);
 
-        overlay.gameObject.SetActive(false);
-        Undo.RegisterCreatedObjectUndo(overlay.gameObject, "Create Collection Overlay");
-        return overlay.gameObject;
+        var title = CreateText("Title", card, "Quick Job", 22, TextAnchor.MiddleCenter, FontStyle.Bold);
+        Stretch(title.rectTransform, new Vector2(0.06f, 0.72f), new Vector2(0.94f, 0.96f));
+        title.raycastTarget = false;
+
+        var duration = CreateText("Duration", card, "30s", 18, TextAnchor.MiddleCenter);
+        duration.color = new Color(0.7f, 0.68f, 0.76f, 1f);
+        Stretch(duration.rectTransform, new Vector2(0.06f, 0.56f), new Vector2(0.94f, 0.74f));
+        duration.raycastTarget = false;
+
+        var reward = CreateText("Reward", card, "+48", 26, TextAnchor.MiddleCenter, FontStyle.Bold);
+        reward.color = Accent;
+        Stretch(reward.rectTransform, new Vector2(0.06f, 0.34f), new Vector2(0.94f, 0.58f));
+        reward.raycastTarget = false;
+
+        var send = Create("Send", card);
+        Stretch(send, new Vector2(0.1f, 0.08f), new Vector2(0.9f, 0.32f));
+        var sendImage = send.gameObject.AddComponent<Image>();
+        sendImage.color = Accent;
+        var sendButton = send.gameObject.AddComponent<Button>();
+        sendButton.targetGraphic = sendImage;
+        sendButton.transition = Selectable.Transition.None;
+        var sendLabel = CreateText("Label", send, "SEND", 20, TextAnchor.MiddleCenter, FontStyle.Bold);
+        sendLabel.color = Color.white;
+        sendLabel.raycastTarget = false;
+        Stretch(sendLabel.rectTransform);
+
+        var option = card.gameObject.AddComponent<WorkJobOption>();
+        option.background = bg;
+        option.titleText = title;
+        option.durationText = duration;
+        option.rewardText = reward;
+        option.sendButton = sendButton;
+        option.sendImage = sendImage;
+        option.sendLabel = sendLabel;
+        return option;
     }
 
     static CollectionRow BuildRowTemplate(Transform parent)
@@ -535,6 +753,23 @@ public static class CollectionScreenSync
         return screens;
     }
 
+    static GameObject FindChild(Transform parent, string name)
+    {
+        var found = parent.Find(name);
+        return found != null ? found.gameObject : null;
+    }
+
+    static RectTransform FindContent(CollectionScreen screen, GameObject overlay)
+    {
+        var so = new SerializedObject(screen);
+        var content = so.FindProperty("content")?.objectReferenceValue as RectTransform;
+        if (content != null)
+            return content;
+        if (overlay == null)
+            return null;
+        return overlay.transform.Find("Panel/Viewport/Content") as RectTransform;
+    }
+
     static void AssignIfNull(SerializedObject so, string property, Object value)
     {
         if (value == null)
@@ -601,14 +836,9 @@ public static class CollectionScreenSync
 
     static void Stretch(RectTransform rt, Vector2 min, Vector2 max)
     {
-        Stretch(rt, min, max, Vector2.zero, Vector2.zero);
-    }
-
-    static void Stretch(RectTransform rt, Vector2 min, Vector2 max, Vector2 offsetMin, Vector2 offsetMax)
-    {
         rt.anchorMin = min;
         rt.anchorMax = max;
-        rt.offsetMin = offsetMin;
-        rt.offsetMax = offsetMax;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
     }
 }

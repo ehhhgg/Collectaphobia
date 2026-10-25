@@ -1,6 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+public interface IPhobiaRowHost
+{
+    void Select(string id);
+    void Inspect(string id);
+}
+
 public class CollectionRow : MonoBehaviour
 {
     public string phobiaId;
@@ -14,11 +20,11 @@ public class CollectionRow : MonoBehaviour
     public Image inspectImage;
     public Text inspectLabel;
 
-    CollectionScreen _screen;
+    IPhobiaRowHost _host;
 
     void Awake()
     {
-        _screen = GetComponentInParent<CollectionScreen>();
+        _host = FindHost();
         if (selectButton != null)
             selectButton.onClick.AddListener(OnSelectPressed);
         if (inspectButton != null)
@@ -27,13 +33,23 @@ public class CollectionRow : MonoBehaviour
 
     public void OnSelectPressed()
     {
-        if (_screen != null)
-            _screen.Select(phobiaId);
+        _host?.Select(phobiaId);
     }
 
     public void OnInspectPressed()
     {
-        if (_screen != null)
-            _screen.Inspect(phobiaId);
+        _host?.Inspect(phobiaId);
+    }
+
+    IPhobiaRowHost FindHost()
+    {
+        var behaviours = GetComponentsInParent<MonoBehaviour>(true);
+        for (var i = 0; i < behaviours.Length; i++)
+        {
+            if (behaviours[i] is IPhobiaRowHost host)
+                return host;
+        }
+
+        return null;
     }
 }

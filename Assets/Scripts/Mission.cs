@@ -27,13 +27,67 @@ public class MissionRecord
     }
 }
 
+[Serializable]
+public class JobDefinition
+{
+    public string id;
+    public string displayName;
+    public TimeSpan duration;
+    public float rewardMultiplier;
+
+    public JobDefinition(string id, string displayName, TimeSpan duration, float rewardMultiplier)
+    {
+        this.id = id;
+        this.displayName = displayName;
+        this.duration = duration;
+        this.rewardMultiplier = rewardMultiplier;
+    }
+
+    public string DurationLabel
+    {
+        get
+        {
+            if (duration.TotalHours >= 1d)
+                return $"{(int)duration.TotalHours}h";
+            if (duration.TotalMinutes >= 1d)
+                return $"{(int)duration.TotalMinutes}m";
+            return $"{(int)duration.TotalSeconds}s";
+        }
+    }
+}
+
 public static class MissionRules
 {
-    public const int MaxConcurrent = 1;
+    public const int MaxConcurrent = 3;
     public const string GatherId = "gather";
-    public static readonly TimeSpan GatherDuration = TimeSpan.FromSeconds(30);
+    public const string QuickId = "quick";
+    public const string ShiftId = "shift";
+    public const string HaulId = "haul";
 
-    public static double Reward(Rarity rarity, int collected)
+    public static readonly JobDefinition[] Jobs =
+    {
+        new(QuickId, "Quick Job", TimeSpan.FromSeconds(30), 1f),
+        new(ShiftId, "Shift", TimeSpan.FromMinutes(5), 10f),
+        new(HaulId, "Long Haul", TimeSpan.FromHours(1), 120f)
+    };
+
+    public static readonly TimeSpan GatherDuration = Jobs[0].duration;
+
+    public static JobDefinition JobById(string id)
+    {
+        if (string.IsNullOrEmpty(id) || id == GatherId)
+            return Jobs[0];
+
+        for (var i = 0; i < Jobs.Length; i++)
+        {
+            if (Jobs[i].id == id)
+                return Jobs[i];
+        }
+
+        return Jobs[0];
+    }
+
+    public static double Reward(Rarity rarity, int collected, string missionId = null)
     {
         var rarityMult = rarity switch
         {
@@ -46,7 +100,8 @@ public static class MissionRules
         };
 
         var countMult = Mathf.Sqrt(Mathf.Max(1, collected));
-        return Math.Floor(48d * rarityMult * countMult);
+        var timeMult = JobById(missionId).rewardMultiplier;
+        return Math.Floor(48d * timeMult * rarityMult * countMult);
     }
 
     public static string FormatRemaining(TimeSpan remaining)
