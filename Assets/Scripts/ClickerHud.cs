@@ -25,6 +25,7 @@ public class ClickerHud : MonoBehaviour
     [SerializeField] AutoClickerShopRow[] shopRows;
     [SerializeField] RarityCountLabel[] rarityCounts;
     [SerializeField] PhobiaReveal reveal;
+    [SerializeField] Button exitButton;
 
     static readonly Color Accent = new(0.95f, 0.42f, 0.55f);
 
@@ -53,7 +54,15 @@ public class ClickerHud : MonoBehaviour
         if (reveal == null)
             reveal = GetComponent<PhobiaReveal>();
 
-        BuildExitButton();
+        if (exitButton == null)
+        {
+            var exit = transform.Find("Exit");
+            if (exit != null)
+                exitButton = exit.GetComponent<Button>();
+        }
+
+        if (exitButton != null)
+            exitButton.onClick.AddListener(QuitGame);
 
         game.StateChanged += Refresh;
         Refresh();
@@ -108,6 +117,17 @@ public class ClickerHud : MonoBehaviour
         RefreshInventory();
     }
 
+    public void ShowMergeResult(PhobiaDefinition def, bool firstTime)
+    {
+        HideHint();
+        if (def == null)
+            return;
+        if (reveal != null)
+            reveal.ShowMerge(def, firstTime);
+        ShowToast($"Merged into {def.Label}  ·  {RarityStyle.Label(def.rarity)}", RarityStyle.Color(def.rarity), 2.6f);
+        RefreshInventory();
+    }
+
     public void ShowOfflineGain(double amount, TimeSpan elapsed)
     {
         if (amount < 1d)
@@ -122,27 +142,6 @@ public class ClickerHud : MonoBehaviour
 #else
         Application.Quit();
 #endif
-    }
-
-    void BuildExitButton()
-    {
-        var parent = canvasRect != null ? canvasRect : transform as RectTransform;
-        if (parent == null)
-            return;
-
-        var exit = Create("Exit", parent);
-        Stretch(exit, new Vector2(0.74f, 0.905f), new Vector2(0.94f, 0.968f));
-        var image = exit.gameObject.AddComponent<Image>();
-        image.color = Accent;
-        var button = exit.gameObject.AddComponent<Button>();
-        button.targetGraphic = image;
-        button.transition = Selectable.Transition.None;
-        button.onClick.AddListener(QuitGame);
-
-        var label = CreateText("Label", exit, "EXIT", 22, TextAnchor.MiddleCenter, FontStyle.Bold);
-        label.color = Color.white;
-        label.raycastTarget = false;
-        Stretch(label.rectTransform, Vector2.zero, Vector2.one);
     }
 
     public void ShowToast(string message, Color color, float hold = 1.8f)
@@ -295,43 +294,4 @@ public class ClickerHud : MonoBehaviour
         _ => "?"
     };
 
-    static RectTransform Create(string name, Transform parent)
-    {
-        var go = new GameObject(name, typeof(RectTransform));
-        go.layer = parent.gameObject.layer;
-        var rt = (RectTransform)go.transform;
-        rt.SetParent(parent, false);
-        return rt;
-    }
-
-    static Text CreateText(string name, Transform parent, string value, int size, TextAnchor align, FontStyle style = FontStyle.Normal)
-    {
-        var rt = Create(name, parent);
-        var text = rt.gameObject.AddComponent<Text>();
-        text.font = UiFont();
-        text.fontSize = size;
-        text.fontStyle = style;
-        text.alignment = align;
-        text.color = Color.white;
-        text.text = value;
-        text.horizontalOverflow = HorizontalWrapMode.Overflow;
-        text.verticalOverflow = VerticalWrapMode.Overflow;
-        return text;
-    }
-
-    static Font UiFont()
-    {
-        var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        if (font == null)
-            font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-        return font;
-    }
-
-    static void Stretch(RectTransform rt, Vector2 min, Vector2 max)
-    {
-        rt.anchorMin = min;
-        rt.anchorMax = max;
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
-    }
 }

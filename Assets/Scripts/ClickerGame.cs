@@ -35,16 +35,11 @@ public class ClickerGame : MonoBehaviour
             return;
 
         _autoBank += cps * Time.deltaTime;
-        var autoPulse = false;
         while (_autoBank >= 1f)
         {
             _autoBank -= 1f;
             RegisterClick();
-            autoPulse = true;
         }
-
-        if (autoPulse)
-            world.PulseAutoClickers();
     }
 
     public void ManualClick()
@@ -86,8 +81,6 @@ public class ClickerGame : MonoBehaviour
 
     public void AfterSaveRestored()
     {
-        if (world != null)
-            world.RefreshAutoClickers(State);
         Notify();
     }
 
@@ -98,10 +91,7 @@ public class ClickerGame : MonoBehaviour
         State.Clear();
         State.ClicksUntilRelic = RollRelicThreshold();
         if (world != null)
-        {
             world.ClearDrops();
-            world.RefreshAutoClickers(State);
-        }
 
         Notify();
     }
@@ -118,12 +108,11 @@ public class ClickerGame : MonoBehaviour
 
         State.Courage -= cost;
         State.AddAuto(def.id);
-        world.RefreshAutoClickers(State);
         Notify();
         return true;
     }
 
-    public bool TryStartGather(string phobiaId)
+    public bool TryStartGather(string phobiaId, string jobId = null)
     {
         if (catalog == null || string.IsNullOrEmpty(phobiaId))
             return false;
@@ -131,17 +120,19 @@ public class ClickerGame : MonoBehaviour
         var def = catalog.PhobiaById(phobiaId);
         if (def == null || State.PhobiaCount(phobiaId) <= 0)
             return false;
+        var job = MissionRules.JobById(jobId);
         if (State.IsPhobiaOnMission(phobiaId))
+            return false;
+        if (State.MissionForJob(job.id) != null)
             return false;
         if (State.Missions.Count >= MissionRules.MaxConcurrent)
             return false;
-
         State.Missions.Add(new MissionRecord
         {
-            missionId = MissionRules.GatherId,
+            missionId = job.id,
             phobiaId = phobiaId,
             startedUtcTicks = DateTime.UtcNow.Ticks,
-            durationSeconds = (float)MissionRules.GatherDuration.TotalSeconds,
+            durationSeconds = (float)job.duration.TotalSeconds,
             collectedAtStart = State.PhobiaCount(phobiaId),
             rarity = (int)def.rarity
         });
@@ -155,7 +146,7 @@ public class ClickerGame : MonoBehaviour
         if (mission == null || !mission.IsComplete)
             return false;
 
-        var reward = MissionRules.Reward((Rarity)mission.rarity, mission.collectedAtStart);
+        var reward = MissionRules.Reward((Rarity)mission.rarity, mission.collectedAtStart, mission.missionId);
         State.Courage += reward;
         State.Missions.Remove(mission);
         if (_missionReadyToastId == phobiaId)
@@ -169,14 +160,86 @@ public class ClickerGame : MonoBehaviour
         return true;
     }
 
-    public double PreviewGatherReward(string phobiaId)
+    public bool CanMerge(string phobiaId, out string reason)
+    {
+        reason = "";
+        if (catalog == null || string.IsNullOrEmpty(phobiaId))
+        {
+            reason = "Select an unlocked phobia to merge.";
+            return false;
+        }
+
+        var def = catalog.PhobiaById(phobiaId);
+        if (def == null || State.PhobiaCount(phobiaId) <= 0)
+        {
+            reason = "Select an unlocked phobia to merge.";
+            return false;
+        }
+
+        if (!MergeRules.TryNextRarity(def.rarity, out var next))
+        {
+            reason = "Legendary phobias cannot be merged.";
+            return false;
+        }
+
+        if (State.IsPhobiaOnMission(phobiaId))
+        {
+            reason = $"{def.Label} is working. Claim or wait first.";
+            return false;
+        }
+
+        if (State.PhobiaCount(phobiaId) < MergeRules.Cost)
+        {
+            reason = $"Need {MergeRules.Cost} copies to merge.";
+            return false;
+        }
+
+        if (!catalog.HasPhobiaOf(next))
+        {
+            reason = $"No {RarityStyle.Label(next)} phobias in the catalog.";
+            return false;
+        }
+
+        return true;
+    }
+
+    public bool TryMerge(string phobiaId)
+    {
+        if (!CanMerge(phobiaId, out var reason))
+        {
+            if (hud != null && !string.IsNullOrEmpty(reason))
+                hud.ShowToast(reason, new Color(0.95f, 0.42f, 0.55f));
+            return false;
+        }
+
+        var source = catalog.PhobiaById(phobiaId);
+        if (!MergeRules.TryNextRarity(source.rarity, out var next))
+            return false;
+
+        var result = catalog.RandomPhobiaOfExact(next);
+        if (result == null)
+            return false;
+
+        var firstTime = State.PhobiaCount(result.id) == 0;
+        if (!State.TrySpendPhobias(phobiaId, source.rarity, MergeRules.Cost))
+            return false;
+
+        State.AddPhobia(result.id, result.rarity);
+        if (hud != null)
+            hud.ShowMergeResult(result, firstTime);
+
+        Notify();
+        return true;
+    }
+
+    public double PreviewGatherReward(string phobiaId, string jobId = null)
     {
         if (catalog == null)
             return 0d;
         var def = catalog.PhobiaById(phobiaId);
         if (def == null)
             return 0d;
-        return MissionRules.Reward(def.rarity, State.PhobiaCount(phobiaId));
+        return MissionRules.Reward(def.rarity, State.PhobiaCount(phobiaId), jobId);
     }
 
     void TickMissions()
@@ -193,7 +256,7 @@ public class ClickerGame : MonoBehaviour
 
         _missionReadyToastId = ready.phobiaId;
         if (hud != null)
-            hud.ShowToast("Mission complete  ·  open Collection", new Color(0.95f, 0.42f, 0.55f), 2.4f);
+            hud.ShowToast("Job complete  ·  open Work", new Color(0.95f, 0.42f, 0.55f), 2.4f);
         Notify();
     }
 

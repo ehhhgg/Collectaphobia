@@ -13,14 +13,11 @@ public class ClickerWorld : MonoBehaviour
     [SerializeField] Camera playCamera;
     [SerializeField] Transform dropOrigin;
     [SerializeField] Transform shelf;
-    [SerializeField] Transform autoRoot;
     [SerializeField] ClickerCatalog catalog;
     [SerializeField] PhobiaBall ballPrefab;
 
     readonly List<GameObject> _shelfItems = new();
     readonly List<PhobiaBall> _sealedBalls = new();
-    readonly List<GameObject> _autoVisuals = new();
-    readonly List<Vector3> _autoBaseScales = new();
     int _nextSlot;
 
     public int PendingCount
@@ -57,17 +54,6 @@ public class ClickerWorld : MonoBehaviour
         _nextSlot = 0;
     }
 
-    public void PulseAutoClickers()
-    {
-        var count = Mathf.Min(_autoVisuals.Count, 8);
-        for (var i = 0; i < count; i++)
-        {
-            if (_autoVisuals[i] == null)
-                continue;
-            StartCoroutine(PulseRoutine(_autoVisuals[i].transform, _autoBaseScales[i], 1.14f, 0.08f));
-        }
-    }
-
     public void StorePhobia(PhobiaDefinition def)
     {
         if (ballPrefab == null || def == null)
@@ -102,45 +88,6 @@ public class ClickerWorld : MonoBehaviour
             def = catalog.PhobiaOf(hit.ContainedRarity);
         StartCoroutine(OpenBall(hit, def));
         return true;
-    }
-
-    public void RefreshAutoClickers(GameState state)
-    {
-        foreach (var visual in _autoVisuals)
-        {
-            if (visual != null)
-                Destroy(visual);
-        }
-
-        _autoVisuals.Clear();
-        _autoBaseScales.Clear();
-
-        if (catalog == null)
-            return;
-
-        var index = 0;
-        foreach (var def in catalog.autoClickers)
-        {
-            if (def == null || def.prefab == null)
-                continue;
-
-            var owned = state.AutoCount(def.id);
-            for (var i = 0; i < owned && i < 6; i++)
-            {
-                var angle = index * 28f - 70f;
-                var rad = angle * Mathf.Deg2Rad;
-                var pos = new Vector3(Mathf.Sin(rad) * 2.05f, 1.15f + (i % 3) * 0.08f, Mathf.Cos(rad) * 0.55f);
-                var go = Instantiate(def.prefab, autoRoot);
-                go.name = def.displayName;
-                go.transform.localPosition = pos;
-                go.transform.localScale = Vector3.one * 0.28f;
-                if (dropOrigin != null)
-                    go.transform.LookAt(dropOrigin);
-                _autoVisuals.Add(go);
-                _autoBaseScales.Add(go.transform.localScale);
-                index++;
-            }
-        }
     }
 
     IEnumerator BallFlight(PhobiaDefinition def)
@@ -293,22 +240,6 @@ public class ClickerWorld : MonoBehaviour
                 _sealedBalls.Remove(ball);
             Destroy(oldest);
         }
-    }
-
-    IEnumerator PulseRoutine(Transform target, Vector3 baseScale, float peak, float duration)
-    {
-        var t = 0f;
-        while (t < duration && target != null)
-        {
-            t += Time.deltaTime;
-            var u = t / duration;
-            var s = Mathf.Sin(u * Mathf.PI) * (peak - 1f);
-            target.localScale = baseScale * (1f + s);
-            yield return null;
-        }
-
-        if (target != null)
-            target.localScale = baseScale;
     }
 
     void FitViewport()

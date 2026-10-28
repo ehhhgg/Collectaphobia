@@ -26,3 +26,20 @@ public static class RarityStyle
 
     public static string Label(Rarity rarity) => rarity.ToString().ToUpperInvariant();
 }
+
+public static class MergeRules
+{
+    public const int Cost = 10;
+
+    public static bool TryNextRarity(Rarity rarity, out Rarity next)
+    {
+        if (rarity >= Rarity.Legendary)
+        {
+            next = rarity;
+            return false;
+        }
+
+        next = rarity + 1;
+        return true;
+    }
+}

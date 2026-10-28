@@ -44,7 +44,7 @@ public class PhobiaCatalogWindow : EditorWindow
         EditorGUILayout.Space(8);
         EditorGUILayout.LabelField("Add Phobia Characters", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(
-            "Add a named phobia to the catalog. Use 2D art, a 3D model, or both. The 3D model is what appears on the shelf and in inspect. If you only add 2D art, a double-sided plane is created from it. 2D art is also used in the collection list.",
+            "Add a named phobia to the catalog. Use 2D art, a 3D model, or both. The 3D model is what appears on the shelf and in inspect. If you only add 2D art, a double-sided plane is created from it. 2D art is also used in the collection list. Adding or removing a phobia updates collection rows in the loaded scene so the UI team can edit them in the hierarchy.",
             MessageType.Info);
 
         EditorGUI.BeginChangeCheck();
@@ -109,12 +109,15 @@ public class PhobiaCatalogWindow : EditorWindow
                 false);
             if (EditorGUI.EndChangeCheck())
             {
+                var artChanged = art != def.art;
                 Undo.RecordObject(_catalog, "Edit Phobia Details");
                 def.artist = artist;
                 def.description = description;
                 def.art = art;
                 def.prefab = model;
                 EditorUtility.SetDirty(_catalog);
+                if (artChanged)
+                    CollectionScreenSync.SyncFromCatalogQuiet();
             }
             EditorGUILayout.EndVertical();
 
@@ -275,6 +278,7 @@ public class PhobiaCatalogWindow : EditorWindow
 
         SetStatus($"Added {_displayName.Trim()} ({_rarity}).", MessageType.Info);
         EditorGUIUtility.PingObject(prefab);
+        CollectionScreenSync.SyncFromCatalogQuiet();
         ClearForm();
     }
 
@@ -404,6 +408,7 @@ public class PhobiaCatalogWindow : EditorWindow
         so.ApplyModifiedProperties();
         EditorUtility.SetDirty(_catalog);
         AssetDatabase.SaveAssets();
+        CollectionScreenSync.SyncFromCatalogQuiet();
         SetStatus("Removed from catalog. Prefab/material files were kept.", MessageType.Info);
     }
 

@@ -13,46 +13,6 @@ MonoBehaviour:
   m_Name: ClickerCatalog
   m_EditorClassIdentifier: Assembly-CSharp::ClickerCatalog
   phobias:
-  - id: common
-    displayName: Common
-    rarity: 0
-    art: {fileID: 0}
-    prefab: {fileID: 1194536141242494251, guid: 4733fd7431113e0408bbbaf7d4a9dfc3, type: 3}
-    artist: 
-    description: 
-    notes: 
-  - id: uncommon
-    displayName: Uncommon
-    rarity: 1
-    art: {fileID: 0}
-    prefab: {fileID: 721987647898309123, guid: f7efc87ec6967c04bae53e567eed096b, type: 3}
-    artist: 
-    description: 
-    notes: 
-  - id: rare
-    displayName: Rare
-    rarity: 2
-    art: {fileID: 0}
-    prefab: {fileID: 1467753070536414327, guid: a93d8aad2b4a84f4bad9e5b6c0274af4, type: 3}
-    artist: 
-    description: 
-    notes: 
-  - id: epic
-    displayName: Epic
-    rarity: 3
-    art: {fileID: 0}
-    prefab: {fileID: 2715516939517112976, guid: bc8b807f8ca0e7e48aa8d45bf179a875, type: 3}
-    artist: 
-    description: 
-    notes: 
-  - id: legendary
-    displayName: Legendary
-    rarity: 4
-    art: {fileID: 0}
-    prefab: {fileID: 2168806427850938138, guid: 8556d85016c4cc248a89353e6689f760, type: 3}
-    artist: 
-    description: 
-    notes: 
   - id: coulrophobia
     displayName: Coulrophobia
     rarity: 0
@@ -64,7 +24,7 @@ MonoBehaviour:
   - id: pyrophobia
     displayName: Pyrophobia
     rarity: 1
-    art: {fileID: 2800000, guid: 850aefd911fcd3a4d890edbcaa9204d0, type: 3}
+    art: {fileID: 2800000, guid: c3013b5e318214d4881c3eb377b49e76, type: 3}
     prefab: {fileID: 1194536141242494251, guid: ba60c35e40c68ca47b4f1ce775247581, type: 3}
     artist: Jadyn
     description: Ironically chill for a hothead, no?
@@ -164,6 +124,70 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 56da382f1980c794698397d471a80319, type: 3}
     prefab: {fileID: 3909598737517654052, guid: a7a392abddf278241ad3dda0141eece3, type: 3}
     artist: Jadyn
+    description: 
+    notes: 
+  - id: theophobia
+    displayName: Theophobia
+    rarity: 0
+    art: {fileID: 2800000, guid: b6c569b6f0753064cb746f2f28e1547e, type: 3}
+    prefab: {fileID: 2496159248356725914, guid: 4cda85f1703bd6646a4d57488276f24d, type: 3}
+    artist: Jadyn
+    description: Be not Afraid.
+    notes: 
+  - id: cyanophobia
+    displayName: Cyanophobia
+    rarity: 3
+    art: {fileID: 2800000, guid: 4c24b85b864d80f4895a0b6c66ea9b9a, type: 3}
+    prefab: {fileID: 816193545376729137, guid: 69c326436f6f4f74b8b2cc11eda2e214, type: 3}
+    artist: Jose
+    description: 
+    notes: 
+  - id: erythrophobia
+    displayName: Erythrophobia
+    rarity: 3
+    art: {fileID: 2800000, guid: a1909c3595ba3744581bdb7967377119, type: 3}
+    prefab: {fileID: 3897754769261181259, guid: 04e10bd61a840dd42b9acfed1d5bad60, type: 3}
+    artist: Jose
+    description: 
+    notes: 
+  - id: prasinophobia
+    displayName: Prasinophobia
+    rarity: 3
+    art: {fileID: 2800000, guid: 4fa8b65b524ab344d937ff5bdd775889, type: 3}
+    prefab: {fileID: 5579831234238940496, guid: c9f042921f7276d4c8115a5ee1d43e53, type: 3}
+    artist: Jose
+    description: 
+    notes: 
+  - id: rhodophobia
+    displayName: Rhodophobia
+    rarity: 3
+    art: {fileID: 2800000, guid: cf1336d8a540ba74fa1991e1935bff75, type: 3}
+    prefab: {fileID: 4565043739432032562, guid: d8b43b2f3ebf88140869538e6a4813e2, type: 3}
+    artist: Jose
+    description: 
+    notes: 
+  - id: xanthophobia
+    displayName: Xanthophobia
+    rarity: 3
+    art: {fileID: 2800000, guid: 2cae72db92647524683d3af3219dd532, type: 3}
+    prefab: {fileID: 6585570340468327974, guid: 0ac188f69aafdb8488596ca14ae114a3, type: 3}
+    artist: Jose
+    description: 
+    notes: 
+  - id: octophobia
+    displayName: Octophobia
+    rarity: 4
+    art: {fileID: 2800000, guid: 23ddd4736c3becf4682d8e65270a08d9, type: 3}
+    prefab: {fileID: 1848512268117417248, guid: d28d9be58869aa7428b0dba5a10cb761, type: 3}
+    artist: Paige
+    description: 
+    notes: 
+  - id: ophidipphobia
+    displayName: Ophidipphobia
+    rarity: 0
+    art: {fileID: 2800000, guid: aec79daeec0135d46a75693533a5d638, type: 3}
+    prefab: {fileID: 1885764288902518776, guid: 26d896bbf020818489afb90d9fb9a4e4, type: 3}
+    artist: Paige
     description: 
     notes: 
   autoClickers:

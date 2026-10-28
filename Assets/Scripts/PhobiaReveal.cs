@@ -6,20 +6,22 @@ using UnityEngine.UI;
 public class PhobiaReveal : MonoBehaviour
 {
     [SerializeField] ClickerGame game;
+    [Header("Scene UI")]
+    [SerializeField] GameObject overlay;
+    [SerializeField] Text bannerText;
+    [SerializeField] Text nameText;
+    [SerializeField] Text rarityText;
+    [SerializeField] Text artistText;
+    [SerializeField] Text descriptionText;
+    [SerializeField] RawImage modelView;
+    [SerializeField] RawImage artView;
+    [SerializeField] Button closeButton;
 
     static readonly Color Accent = new(0.95f, 0.42f, 0.55f);
     static readonly Vector3 StageOffset = new(180f, 0f, 0f);
 
     readonly Queue<PhobiaDefinition> _queue = new();
-    GameObject _overlay;
     GameObject _stage;
-    RawImage _modelView;
-    RawImage _artView;
-    Text _bannerText;
-    Text _nameText;
-    Text _rarityText;
-    Text _artistText;
-    Text _descriptionText;
     Transform _pivot;
     GameObject _model;
     RenderTexture _rt;
@@ -31,11 +33,18 @@ public class PhobiaReveal : MonoBehaviour
     {
         if (game == null)
             game = GetComponentInParent<ClickerGame>();
+        ResolveSceneRefs();
+        if (closeButton != null)
+            closeButton.onClick.AddListener(Close);
+        if (overlay != null)
+            overlay.SetActive(false);
+        else
+            Debug.LogError("PhobiaReveal has no overlay in the scene. Run Phobia/Sync Collection Screen.", this);
     }
 
     void Start()
     {
-        Build();
+        EnsureStage();
     }
 
     void Update()
@@ -61,8 +70,8 @@ public class PhobiaReveal : MonoBehaviour
         if (def == null)
             return;
 
-        if (_overlay == null)
-            Build();
+        ResolveSceneRefs();
+        EnsureStage();
 
         if (_open && firstUnlock)
         {
@@ -70,7 +79,17 @@ public class PhobiaReveal : MonoBehaviour
             return;
         }
 
-        Display(def, firstUnlock);
+        Display(def, firstUnlock ? "NEW PHOBIA" : "INSPECT");
+    }
+
+    public void ShowMerge(PhobiaDefinition def, bool firstUnlock)
+    {
+        if (def == null)
+            return;
+
+        ResolveSceneRefs();
+        EnsureStage();
+        Display(def, firstUnlock ? "NEW PHOBIA" : "MERGE RESULT");
     }
 
     public void Close()
@@ -78,58 +97,61 @@ public class PhobiaReveal : MonoBehaviour
         TearDownModel();
         if (_queue.Count > 0)
         {
-            Display(_queue.Dequeue(), true);
+            Display(_queue.Dequeue(), "NEW PHOBIA");
             return;
         }
 
         _open = false;
-        if (_overlay != null)
-            _overlay.SetActive(false);
+        if (overlay != null)
+            overlay.SetActive(false);
     }
 
-    void Display(PhobiaDefinition def, bool firstUnlock)
+    void Display(PhobiaDefinition def, string banner)
     {
+        if (overlay == null)
+            return;
+
         _open = true;
-        _overlay.SetActive(true);
-        _overlay.transform.SetAsLastSibling();
+        overlay.SetActive(true);
+        overlay.transform.SetAsLastSibling();
 
-        if (_bannerText != null)
+        if (bannerText != null)
         {
-            _bannerText.text = firstUnlock ? "NEW PHOBIA" : "INSPECT";
-            _bannerText.color = Accent;
+            bannerText.text = banner;
+            bannerText.color = Accent;
         }
 
-        if (_nameText != null)
+        if (nameText != null)
         {
-            _nameText.text = def.Label;
-            _nameText.color = Color.white;
+            nameText.text = def.Label;
+            nameText.color = Color.white;
         }
 
-        if (_rarityText != null)
+        if (rarityText != null)
         {
-            _rarityText.text = RarityStyle.Label(def.rarity);
-            _rarityText.color = RarityStyle.Color(def.rarity);
+            rarityText.text = RarityStyle.Label(def.rarity);
+            rarityText.color = RarityStyle.Color(def.rarity);
         }
 
-        if (_artistText != null)
+        if (artistText != null)
         {
             var hasArtist = !string.IsNullOrWhiteSpace(def.artist);
-            _artistText.gameObject.SetActive(hasArtist);
-            _artistText.text = hasArtist ? $"Art by {def.artist.Trim()}" : "";
+            artistText.gameObject.SetActive(hasArtist);
+            artistText.text = hasArtist ? $"Art by {def.artist.Trim()}" : "";
         }
 
-        if (_descriptionText != null)
+        if (descriptionText != null)
         {
             var hasDescription = !string.IsNullOrWhiteSpace(def.description);
-            _descriptionText.gameObject.SetActive(hasDescription);
-            _descriptionText.text = hasDescription ? def.description.Trim() : "";
+            descriptionText.gameObject.SetActive(hasDescription);
+            descriptionText.text = hasDescription ? def.description.Trim() : "";
         }
 
-        if (_artView != null)
+        if (artView != null)
         {
             var hasArt = def.art != null;
-            _artView.gameObject.SetActive(hasArt);
-            _artView.texture = def.art;
+            artView.gameObject.SetActive(hasArt);
+            artView.texture = def.art;
         }
 
         SpawnModel(def);
@@ -178,12 +200,10 @@ public class PhobiaReveal : MonoBehaviour
         go.transform.position += go.transform.parent.position - bounds.center;
     }
 
-    void Build()
+    void EnsureStage()
     {
-        var canvas = transform as RectTransform;
-        BuildStage();
-        BuildOverlay(canvas);
-        _overlay.SetActive(false);
+        if (_pivot == null)
+            BuildStage();
     }
 
     void BuildStage()
@@ -220,6 +240,8 @@ public class PhobiaReveal : MonoBehaviour
         _rt = new RenderTexture(1024, 1024, 16);
         _rt.Create();
         cam.targetTexture = _rt;
+        if (modelView != null)
+            modelView.texture = _rt;
 
         var lightGo = new GameObject("RevealLight");
         lightGo.transform.SetParent(stage, false);
@@ -231,106 +253,40 @@ public class PhobiaReveal : MonoBehaviour
         light.color = new Color(1f, 0.92f, 0.95f);
     }
 
-    void BuildOverlay(RectTransform canvas)
+    void ResolveSceneRefs()
     {
-        var overlay = Create("PhobiaReveal", canvas);
-        Stretch(overlay);
-        overlay.SetAsLastSibling();
-        var dim = overlay.gameObject.AddComponent<Image>();
-        dim.color = new Color(0.03f, 0.02f, 0.05f, 0.94f);
-        dim.raycastTarget = true;
-        _overlay = overlay.gameObject;
+        if (overlay == null)
+        {
+            var found = transform.Find("PhobiaReveal");
+            if (found != null)
+                overlay = found.gameObject;
+        }
 
-        var banner = CreateText("Banner", overlay, "NEW PHOBIA", 26, TextAnchor.MiddleCenter, FontStyle.Bold);
-        banner.color = Accent;
-        Stretch(banner.rectTransform, new Vector2(0.08f, 0.9f), new Vector2(0.92f, 0.96f));
-        _bannerText = banner;
+        if (overlay == null)
+            return;
 
-        _nameText = CreateText("Name", overlay, "", 44, TextAnchor.MiddleCenter, FontStyle.Bold);
-        Stretch(_nameText.rectTransform, new Vector2(0.06f, 0.82f), new Vector2(0.94f, 0.9f));
-
-        _rarityText = CreateText("Rarity", overlay, "", 26, TextAnchor.MiddleCenter, FontStyle.Bold);
-        Stretch(_rarityText.rectTransform, new Vector2(0.1f, 0.76f), new Vector2(0.9f, 0.82f));
-
-        var view = Create("ModelView", overlay);
-        Stretch(view, new Vector2(0.16f, 0.42f), new Vector2(0.84f, 0.75f));
-        _modelView = view.gameObject.AddComponent<RawImage>();
-        _modelView.texture = _rt;
-        _modelView.raycastTarget = false;
-        _modelView.color = Color.white;
-
-        var artRt = Create("Art", overlay);
-        Stretch(artRt, new Vector2(0.08f, 0.3f), new Vector2(0.24f, 0.4f));
-        _artView = artRt.gameObject.AddComponent<RawImage>();
-        _artView.raycastTarget = false;
-        _artView.color = Color.white;
-
-        _artistText = CreateText("Artist", overlay, "", 20, TextAnchor.MiddleLeft);
-        _artistText.color = new Color(0.86f, 0.82f, 0.9f, 1f);
-        Stretch(_artistText.rectTransform, new Vector2(0.27f, 0.32f), new Vector2(0.92f, 0.4f));
-
-        _descriptionText = CreateText("Description", overlay, "", 20, TextAnchor.UpperLeft);
-        _descriptionText.color = new Color(0.8f, 0.78f, 0.86f, 1f);
-        _descriptionText.horizontalOverflow = HorizontalWrapMode.Wrap;
-        _descriptionText.verticalOverflow = VerticalWrapMode.Overflow;
-        Stretch(_descriptionText.rectTransform, new Vector2(0.08f, 0.16f), new Vector2(0.92f, 0.31f));
-
-        var close = Create("Close", overlay);
-        Stretch(close, new Vector2(0.18f, 0.05f), new Vector2(0.82f, 0.14f));
-        var closeImage = close.gameObject.AddComponent<Image>();
-        closeImage.color = Accent;
-        var closeButton = close.gameObject.AddComponent<Button>();
-        closeButton.targetGraphic = closeImage;
-        closeButton.onClick.AddListener(Close);
-        var closeLabel = CreateText("Label", close, "CLOSE", 32, TextAnchor.MiddleCenter, FontStyle.Bold);
-        closeLabel.color = Color.white;
-        closeLabel.raycastTarget = false;
-        Stretch(closeLabel.rectTransform);
+        var root = overlay.transform;
+        if (bannerText == null)
+            bannerText = FindNamed<Text>(root, "Banner");
+        if (nameText == null)
+            nameText = FindNamed<Text>(root, "Name");
+        if (rarityText == null)
+            rarityText = FindNamed<Text>(root, "Rarity");
+        if (artistText == null)
+            artistText = FindNamed<Text>(root, "Artist");
+        if (descriptionText == null)
+            descriptionText = FindNamed<Text>(root, "Description");
+        if (modelView == null)
+            modelView = FindNamed<RawImage>(root, "ModelView");
+        if (artView == null)
+            artView = FindNamed<RawImage>(root, "Art");
+        if (closeButton == null)
+            closeButton = FindNamed<Button>(root, "Close");
     }
 
-    static RectTransform Create(string name, Transform parent)
+    static T FindNamed<T>(Transform root, string path) where T : Component
     {
-        var go = new GameObject(name, typeof(RectTransform));
-        go.layer = parent.gameObject.layer;
-        var rt = (RectTransform)go.transform;
-        rt.SetParent(parent, false);
-        return rt;
-    }
-
-    static Text CreateText(string name, Transform parent, string value, int size, TextAnchor align, FontStyle style = FontStyle.Normal)
-    {
-        var rt = Create(name, parent);
-        var text = rt.gameObject.AddComponent<Text>();
-        text.font = UiFont();
-        text.fontSize = size;
-        text.fontStyle = style;
-        text.alignment = align;
-        text.color = Color.white;
-        text.text = value;
-        text.horizontalOverflow = HorizontalWrapMode.Overflow;
-        text.verticalOverflow = VerticalWrapMode.Overflow;
-        text.raycastTarget = false;
-        return text;
-    }
-
-    static Font UiFont()
-    {
-        var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        if (font == null)
-            font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-        return font;
-    }
-
-    static void Stretch(RectTransform rt)
-    {
-        Stretch(rt, Vector2.zero, Vector2.one);
-    }
-
-    static void Stretch(RectTransform rt, Vector2 min, Vector2 max)
-    {
-        rt.anchorMin = min;
-        rt.anchorMax = max;
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
+        var found = root.Find(path);
+        return found != null ? found.GetComponent<T>() : null;
     }
 }

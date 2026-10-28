@@ -33,6 +33,19 @@ public class GameState
         PhobiaCounts[id] = PhobiaCount(id) + 1;
     }
 
+    public bool TrySpendPhobias(string id, Rarity rarity, int amount)
+    {
+        if (amount <= 0 || PhobiaCount(id) < amount)
+            return false;
+
+        PhobiaCounts[id] = PhobiaCount(id) - amount;
+        if (PhobiaCounts[id] <= 0)
+            PhobiaCounts.Remove(id);
+
+        Relics[rarity] = Mathf.Max(0, RelicCount(rarity) - amount);
+        return true;
+    }
+
     public void AddAuto(string id)
     {
         AutoClickers[id] = AutoCount(id) + 1;
@@ -64,6 +77,20 @@ public class GameState
     }
 
     public bool IsPhobiaOnMission(string phobiaId) => MissionFor(phobiaId) != null;
+
+    public MissionRecord MissionForJob(string jobId)
+    {
+        var job = MissionRules.JobById(jobId);
+        for (var i = 0; i < Missions.Count; i++)
+        {
+            if (Missions[i] == null)
+                continue;
+            if (MissionRules.JobById(Missions[i].missionId).id == job.id)
+                return Missions[i];
+        }
+
+        return null;
+    }
 
     public MissionRecord FirstCompletableMission()
     {

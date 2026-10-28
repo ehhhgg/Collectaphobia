@@ -63,6 +63,26 @@ public class ClickerCatalog : ScriptableObject
         return Pick(rarity, false);
     }
 
+    public PhobiaDefinition RandomPhobiaOfExact(Rarity rarity)
+    {
+        return Pick(rarity, true);
+    }
+
+    public bool HasPhobiaOf(Rarity rarity)
+    {
+        if (phobias == null)
+            return false;
+
+        for (var i = 0; i < phobias.Length; i++)
+        {
+            var def = phobias[i];
+            if (def != null && def.prefab != null && def.rarity == rarity)
+                return true;
+        }
+
+        return false;
+    }
+
     PhobiaDefinition Pick(Rarity rarity, bool requireMatch)
     {
         if (phobias == null)
