@@ -19,7 +19,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 951c054741682644fb8dac89c9dddb31, type: 3}
     prefab: {fileID: 1194536141242494251, guid: 4de9f24878f8b22448d738a48a9b4049, type: 3}
     artist: Paige
-    description: Oh, how the turned tables. Put a frowning clown to the job.
+    description: This clown wears a frown.
     notes: 
   - id: pyrophobia
     displayName: Pyrophobia
@@ -52,7 +52,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: e22691ac10870dc42af40803f1994773, type: 3}
     prefab: {fileID: 3634609522488056024, guid: 397badb6d49ee4644bfea26f861b9fae, type: 3}
     artist: Ryan
-    description: BATH DELIVERY. It's bubble-ievable
+    description: Scrub a dub, take a dip in this tub.
     notes: 
   - id: canivalphobia
     displayName: Canivalphobia
@@ -76,7 +76,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 00e7e04e3a7abdf43b496fea7a1bffbc, type: 3}
     prefab: {fileID: 5410346379870428264, guid: f0ada7cab1d60044daa26655f4f9634a, type: 3}
     artist: Jadyn
-    description: Now say ahhhhhh
+    description: Gloves? Check. Scalers? Check. Now say ahhhhhh.
     notes: 
   - id: musophobia
     displayName: Musophobia
@@ -84,7 +84,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: f525d93ccac285f448fa6e69566bcd5f, type: 3}
     prefab: {fileID: 5118062157546847804, guid: 541a5e682e156ce4cb5e268bebeb9a28, type: 3}
     artist: Paige
-    description: 
+    description: Tell me where the cheese is. Don't worry I won't rat you out.
     notes: 
   - id: pediaphobia
     displayName: Pediaphobia
@@ -108,7 +108,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: d3f4050f0efdb3443b4ac0cd48cdd6a1, type: 3}
     prefab: {fileID: 5364724626811562650, guid: 5aa95df1cfd93404f81308f6768108d0, type: 3}
     artist: Jose
-    description: 
+    description: Beep Beep Boop. Human life detected.
     notes: 
   - id: thalassophobia
     displayName: Thalassophobia
@@ -124,7 +124,8 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 56da382f1980c794698397d471a80319, type: 3}
     prefab: {fileID: 3909598737517654052, guid: a7a392abddf278241ad3dda0141eece3, type: 3}
     artist: Jadyn
-    description: 
+    description: Ehhhhhhh! This lillypad doesn't have enough room for the both of
+      us.
     notes: 
   - id: theophobia
     displayName: Theophobia
@@ -180,7 +181,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 23ddd4736c3becf4682d8e65270a08d9, type: 3}
     prefab: {fileID: 1848512268117417248, guid: d28d9be58869aa7428b0dba5a10cb761, type: 3}
     artist: Paige
-    description: 
+    description: Here a tough lesson for you. What's 4 + 4?
     notes: 
   - id: ophidipphobia
     displayName: Ophidipphobia
@@ -188,6 +189,96 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: aec79daeec0135d46a75693533a5d638, type: 3}
     prefab: {fileID: 1885764288902518776, guid: 26d896bbf020818489afb90d9fb9a4e4, type: 3}
     artist: Paige
+    description: Sssorry about that. Jusst Ssslighering by.
+    notes: 
+  - id: hexekontaheptaphobia
+    displayName: Hexekontaheptaphobia
+    rarity: 4
+    art: {fileID: 2800000, guid: 6fa4917e99d7c7c49b1ee2267eb64ca6, type: 3}
+    prefab: {fileID: 3960504259890984851, guid: adcc84bf217699343b4e3c365854d81f, type: 3}
+    artist: Jadyn
+    description: 
+    notes: 
+  - id: pediophobia
+    displayName: Pediophobia
+    rarity: 0
+    art: {fileID: 2800000, guid: 847c59a3b2399d84fa41ebfb19ed5153, type: 3}
+    prefab: {fileID: 5762491952413287806, guid: 047eb66d10088354e995a02ea34fa6f2, type: 3}
+    artist: Jadyn
+    description: Sweet, small, and rough around the stiches.
+    notes: 
+  - id: linonophobia
+    displayName: Linonophobia
+    rarity: 2
+    art: {fileID: 2800000, guid: 582b90f5091a57b41b21472c8408889e, type: 3}
+    prefab: {fileID: 2277643215465518971, guid: 1d18e8c963e685c4bbd1615c7f14a3f0, type: 3}
+    artist: Andrew
+    description: I want to tell you a joke but it got a little tangled.
+    notes: 
+  - id: globophobia
+    displayName: Globophobia
+    rarity: 2
+    art: {fileID: 2800000, guid: efbd31144352d0140826040b5b3f2bb0, type: 3}
+    prefab: {fileID: 7269750659369640413, guid: 494ca292a6dfa144caab8eddfb7179bb, type: 3}
+    artist: Andrew
+    description: Careful I'm a little airheaded. So hold me tight, before I float
+      away.
+    notes: 
+  - id: eisoptrophobia
+    displayName: Eisoptrophobia
+    rarity: 2
+    art: {fileID: 2800000, guid: 890678fb80e7bca40afae7f921b56a40, type: 3}
+    prefab: {fileID: 7002222954774778852, guid: 0c1609775e6d07b4e9e287195a5f5699, type: 3}
+    artist: Jadyn
+    description: 
+    notes: 
+  - id: samhainiphobia
+    displayName: Samhainiphobia
+    rarity: 2
+    art: {fileID: 2800000, guid: 2d29f896006d1c643bc2379a7cea1348, type: 3}
+    prefab: {fileID: 7045727418985008401, guid: c7c35d30f223f1d45970af99a08e2354, type: 3}
+    artist: Andrew
+    description: Tricks or it didn't happen.
+    notes: 
+  - id: angrophobia
+    displayName: Angrophobia
+    rarity: 3
+    art: {fileID: 2800000, guid: 31b74c146c253ea4184697952a895f11, type: 3}
+    prefab: {fileID: 8694728690990007097, guid: 623af9e99c0ec1c4e89fe83133332eda, type: 3}
+    artist: Andrew
+    description: 
+    notes: 
+  - id: anatidaephobia
+    displayName: Anatidaephobia
+    rarity: 4
+    art: {fileID: 2800000, guid: 2d2705e0a5a07a547845a008a8d8839e, type: 3}
+    prefab: {fileID: 2187348068610606123, guid: da763bbbfd6186044b242983c208c390, type: 3}
+    artist: Andrew
+    description: Try staring back at the Great Quacksby.
+    notes: 
+  - id: arachibutyrophobia
+    displayName: Arachibutyrophobia
+    rarity: 4
+    art: {fileID: 2800000, guid: fe00235201cc3a3458553a132061ff7a, type: 3}
+    prefab: {fileID: 5212131633110528935, guid: 351586fc42c347e479694cbeaf2a23db, type: 3}
+    artist: Jadyn
+    description: As drippy as goop. Hard as peanut brittle. Might want something
+      to wash me down.
+    notes: 
+  - id: hippopotomonstrosesquippedaliophobia
+    displayName: Hippopotomonstrosesquippedaliophobia
+    rarity: 4
+    art: {fileID: 2800000, guid: bc027bb08d73a0447b14a6195eae2a07, type: 3}
+    prefab: {fileID: 3395634900747315052, guid: be97359e055d28e4cb5530be030cc380, type: 3}
+    artist: Jadyn
+    description: 
+    notes: 
+  - id: chaetophobia
+    displayName: Chaetophobia
+    rarity: 1
+    art: {fileID: 2800000, guid: 3a93f2de5b64a4a4e970a36f86b8892c, type: 3}
+    prefab: {fileID: 1070573967190365658, guid: 42c56ddcdc153d549a26d8c48fb0f3d8, type: 3}
+    artist: Andrew
     description: 
     notes: 
   autoClickers:
