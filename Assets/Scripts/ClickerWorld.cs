@@ -9,6 +9,8 @@ public class ClickerWorld : MonoBehaviour
     const float ShelfBallScale = 0.32f;
     const int MaxOpenedOnShelf = 5;
     const int ShelfColumns = 5;
+    const int MaxSealedOnShelf = ShelfColumns;
+    const int MaxBankFlights = 10;
 
     [SerializeField] Camera playCamera;
     [SerializeField] Transform dropOrigin;
@@ -16,12 +18,30 @@ public class ClickerWorld : MonoBehaviour
     [SerializeField] ClickerCatalog catalog;
     [SerializeField] PhobiaBall ballPrefab;
     [SerializeField] MachineAnimatiorScript machineAnimatior;
+    [SerializeField] RectTransform bankTarget;
 
     readonly List<GameObject> _shelfItems = new();
     readonly List<PhobiaBall> _sealedBalls = new();
+    readonly Queue<PhobiaDefinition> _bank = new();
+    readonly List<GameObject> _bankVisuals = new();
     int _nextSlot;
 
     public int PendingCount
+    {
+        get
+        {
+            var count = _bank.Count;
+            for (var i = 0; i < _sealedBalls.Count; i++)
+            {
+                if (_sealedBalls[i] != null)
+                    count++;
+            }
+
+            return count;
+        }
+    }
+
+    int SealedCount
     {
         get
         {
@@ -50,8 +70,16 @@ public class ClickerWorld : MonoBehaviour
                 Destroy(_shelfItems[i]);
         }
 
+        for (var i = 0; i < _bankVisuals.Count; i++)
+        {
+            if (_bankVisuals[i] != null)
+                Destroy(_bankVisuals[i]);
+        }
+
         _shelfItems.Clear();
         _sealedBalls.Clear();
+        _bank.Clear();
+        _bankVisuals.Clear();
         _nextSlot = 0;
     }
 
@@ -59,7 +87,20 @@ public class ClickerWorld : MonoBehaviour
     {
         if (ballPrefab == null || def == null)
             return;
-        StartCoroutine(BallFlight(def));
+
+        if (machineAnimatior != null)
+            machineAnimatior.PlayAnim();
+
+        if (SealedCount >= MaxSealedOnShelf)
+        {
+            _bank.Enqueue(def);
+            if (_bankVisuals.Count < MaxBankFlights)
+                StartCoroutine(BankFlight(def));
+        }
+        else
+        {
+            StartCoroutine(BallFlight(def));
+        }
     }
 
     public bool TryOpenBall(out PhobiaDefinition def)
@@ -96,7 +137,6 @@ public class ClickerWorld : MonoBehaviour
         var start = dropOrigin != null ? dropOrigin.position : transform.position;
         var slot = NextShelfSlot();
         var ball = Instantiate(ballPrefab, start, Quaternion.identity, transform);
-        machineAnimatior.PlayAnim();    //tells the animation script to play
         ball.name = "PhobiaBall";
         ball.Setup(def);
         _shelfItems.Add(ball.gameObject);
@@ -127,7 +167,72 @@ public class ClickerWorld : MonoBehaviour
         ball.transform.position = slot;
         ball.transform.localScale = landScale;
         ball.MarkLanded();
-        TrimShelf();
+    }
+
+    IEnumerator BankFlight(PhobiaDefinition def)
+    {
+        var start = dropOrigin != null ? dropOrigin.position : transform.position;
+        var ball = Instantiate(ballPrefab, start, Quaternion.identity, transform);
+        ball.name = "BankedBall";
+        ball.Setup(def);
+        foreach (var col in ball.GetComponentsInChildren<Collider>())
+            col.enabled = false;
+
+        _bankVisuals.Add(ball.gameObject);
+
+        var from = ball.transform.position;
+        var startScale = Vector3.one * 0.55f;
+        ball.transform.localScale = startScale;
+
+        var t = 0f;
+        while (t < 1f && ball != null)
+        {
+            t += Time.deltaTime / 0.5f;
+            var u = Mathf.SmoothStep(0f, 1f, t);
+            var mid = Vector3.Lerp(from, BankTargetPoint(), u);
+            mid.y += Mathf.Sin(u * Mathf.PI) * 0.22f;
+            ball.transform.position = mid;
+            ball.transform.localScale = Vector3.Lerp(startScale, Vector3.one * 0.08f, u * u);
+            ball.transform.Rotate(0f, 320f * Time.deltaTime, 0f);
+            yield return null;
+        }
+
+        if (ball != null)
+        {
+            _bankVisuals.Remove(ball.gameObject);
+            Destroy(ball.gameObject);
+        }
+        else
+        {
+            _bankVisuals.RemoveAll(go => go == null);
+        }
+    }
+
+    Vector3 BankTargetPoint()
+    {
+        var depth = dropOrigin != null ? dropOrigin.position : transform.position;
+        if (playCamera == null)
+            return depth + Vector3.up * 1.4f;
+
+        Vector3 screen;
+        if (bankTarget != null)
+        {
+            var corners = new Vector3[4];
+            bankTarget.GetWorldCorners(corners);
+            screen = playCamera.WorldToScreenPoint((corners[0] + corners[2]) * 0.5f);
+        }
+        else
+        {
+            var view = playCamera.pixelRect;
+            screen = new Vector3(view.x + view.width * 0.72f, view.y + view.height * 0.84f, 0f);
+        }
+
+        var ray = playCamera.ScreenPointToRay(screen);
+        var plane = new Plane(-playCamera.transform.forward, depth);
+        if (plane.Raycast(ray, out var enter))
+            return ray.GetPoint(enter);
+
+        return depth + Vector3.up * 1.4f;
     }
 
     IEnumerator OpenBall(PhobiaBall ball, PhobiaDefinition def)
@@ -135,6 +240,7 @@ public class ClickerWorld : MonoBehaviour
         var slot = ball.transform.position;
         _sealedBalls.Remove(ball);
         _shelfItems.Remove(ball.gameObject);
+        TryFlushBank();
 
         GameObject relic = null;
         var fullScale = Vector3.one;
@@ -229,19 +335,10 @@ public class ClickerWorld : MonoBehaviour
             Destroy(go);
     }
 
-    void TrimShelf()
+    void TryFlushBank()
     {
-        while (_shelfItems.Count > 10)
-        {
-            var oldest = _shelfItems[0];
-            _shelfItems.RemoveAt(0);
-            if (oldest == null)
-                continue;
-            var ball = oldest.GetComponent<PhobiaBall>();
-            if (ball != null)
-                _sealedBalls.Remove(ball);
-            Destroy(oldest);
-        }
+        while (_bank.Count > 0 && SealedCount < MaxSealedOnShelf)
+            StartCoroutine(BallFlight(_bank.Dequeue()));
     }
 
     void FitViewport()

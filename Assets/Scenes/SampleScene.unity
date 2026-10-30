@@ -156,6 +156,7 @@ MonoBehaviour:
   catalog: {fileID: 11400000, guid: 290441e9fd0e25b48a30d1a7f6fc6178, type: 2}
   ballPrefab: {fileID: 1123987456123987451, guid: 3f7a9c2e8d1b4e6a90c5d4f8a2b7e1c0, type: 3}
   machineAnimatior: {fileID: 32789180}
+  bankTarget: {fileID: 73365968}
 --- !u!114 &3141815
 MonoBehaviour:
   m_ObjectHideFlags: 0
