@@ -15,6 +15,7 @@ public class ClickerWorld : MonoBehaviour
     [SerializeField] Transform shelf;
     [SerializeField] ClickerCatalog catalog;
     [SerializeField] PhobiaBall ballPrefab;
+    [SerializeField] MachineAnimatiorScript machineAnimatior;
 
     readonly List<GameObject> _shelfItems = new();
     readonly List<PhobiaBall> _sealedBalls = new();
@@ -95,6 +96,7 @@ public class ClickerWorld : MonoBehaviour
         var start = dropOrigin != null ? dropOrigin.position : transform.position;
         var slot = NextShelfSlot();
         var ball = Instantiate(ballPrefab, start, Quaternion.identity, transform);
+        machineAnimatior.PlayAnim();    //tells the animation script to play
         ball.name = "PhobiaBall";
         ball.Setup(def);
         _shelfItems.Add(ball.gameObject);
