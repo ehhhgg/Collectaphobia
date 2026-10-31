@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 public class PhobiaReveal : MonoBehaviour
@@ -16,15 +15,14 @@ public class PhobiaReveal : MonoBehaviour
     [SerializeField] RawImage modelView;
     [SerializeField] RawImage artView;
     [SerializeField] Button closeButton;
+    [Header("Reveal Stage")]
+    [SerializeField] Transform pivot;
+    [SerializeField] Camera revealCamera;
 
     static readonly Color Accent = new(0.95f, 0.42f, 0.55f);
-    static readonly Vector3 StageOffset = new(180f, 0f, 0f);
 
     readonly Queue<PhobiaDefinition> _queue = new();
-    GameObject _stage;
-    Transform _pivot;
     GameObject _model;
-    RenderTexture _rt;
     bool _open;
 
     public bool IsOpen => _open;
@@ -39,30 +37,23 @@ public class PhobiaReveal : MonoBehaviour
         if (overlay != null)
             overlay.SetActive(false);
         else
-            Debug.LogError("PhobiaReveal has no overlay in the scene. Run Phobia/Sync Collection Screen.", this);
-    }
+            Debug.LogError("PhobiaReveal has no overlay in the scene.", this);
 
-    void Start()
-    {
-        EnsureStage();
+        if (pivot == null)
+            Debug.LogError("PhobiaReveal has no RevealStage pivot in the scene.", this);
+
+        BindModelView();
     }
 
     void Update()
     {
-        if (_pivot != null && _open)
-            _pivot.Rotate(0f, 48f * Time.deltaTime, 0f, Space.Self);
+        if (pivot != null && _open)
+            pivot.Rotate(0f, 48f * Time.deltaTime, 0f, Space.Self);
     }
 
     void OnDestroy()
     {
         TearDownModel();
-        if (_stage != null)
-            Destroy(_stage);
-        if (_rt != null)
-        {
-            _rt.Release();
-            Destroy(_rt);
-        }
     }
 
     public void Show(PhobiaDefinition def, bool firstUnlock = true)
@@ -71,7 +62,7 @@ public class PhobiaReveal : MonoBehaviour
             return;
 
         ResolveSceneRefs();
-        EnsureStage();
+        BindModelView();
 
         if (_open && firstUnlock)
         {
@@ -88,7 +79,7 @@ public class PhobiaReveal : MonoBehaviour
             return;
 
         ResolveSceneRefs();
-        EnsureStage();
+        BindModelView();
         Display(def, firstUnlock ? "NEW PHOBIA" : "MERGE RESULT");
     }
 
@@ -160,10 +151,10 @@ public class PhobiaReveal : MonoBehaviour
     void SpawnModel(PhobiaDefinition def)
     {
         TearDownModel();
-        if (def.prefab == null || _pivot == null)
+        if (def.prefab == null || pivot == null)
             return;
 
-        _model = Instantiate(def.prefab, _pivot);
+        _model = Instantiate(def.prefab, pivot);
         _model.name = def.Label;
         foreach (var col in _model.GetComponentsInChildren<Collider>())
             col.enabled = false;
@@ -177,8 +168,8 @@ public class PhobiaReveal : MonoBehaviour
             return;
         Destroy(_model);
         _model = null;
-        if (_pivot != null)
-            _pivot.localRotation = Quaternion.identity;
+        if (pivot != null)
+            pivot.localRotation = Quaternion.identity;
     }
 
     static void FitToView(GameObject go)
@@ -187,70 +178,30 @@ public class PhobiaReveal : MonoBehaviour
         if (renderers.Length == 0)
             return;
 
+        var bounds = Encapsulate(renderers);
+        var extent = Mathf.Max(bounds.size.x, bounds.size.y, 0.01f);
+        go.transform.localScale *= 1.1f / extent;
+
+        bounds = Encapsulate(go.GetComponentsInChildren<Renderer>());
+        var parent = go.transform.parent;
+        if (parent == null)
+            return;
+        go.transform.position += parent.position - bounds.center;
+    }
+
+    static Bounds Encapsulate(Renderer[] renderers)
+    {
         var bounds = renderers[0].bounds;
         for (var i = 1; i < renderers.Length; i++)
             bounds.Encapsulate(renderers[i].bounds);
-
-        var size = Mathf.Max(0.01f, bounds.size.magnitude);
-        go.transform.localScale *= 1.45f / size;
-
-        bounds = renderers[0].bounds;
-        for (var i = 1; i < renderers.Length; i++)
-            bounds.Encapsulate(renderers[i].bounds);
-        go.transform.position += go.transform.parent.position - bounds.center;
+        return bounds;
     }
 
-    void EnsureStage()
+    void BindModelView()
     {
-        if (_pivot == null)
-            BuildStage();
-    }
-
-    void BuildStage()
-    {
-        var parent = game != null ? game.transform : transform.root;
-        var stage = new GameObject("RevealStage").transform;
-        stage.SetParent(parent, true);
-        stage.position = StageOffset;
-        stage.rotation = Quaternion.identity;
-        stage.localScale = Vector3.one;
-        _stage = stage.gameObject;
-
-        _pivot = new GameObject("Pivot").transform;
-        _pivot.SetParent(stage, false);
-
-        var camGo = new GameObject("RevealCamera");
-        camGo.transform.SetParent(stage, false);
-        camGo.transform.localPosition = new Vector3(0f, 0.15f, -2.5f);
-        camGo.transform.LookAt(_pivot);
-
-        var cam = camGo.AddComponent<Camera>();
-        cam.clearFlags = CameraClearFlags.SolidColor;
-        cam.backgroundColor = new Color(0.09f, 0.07f, 0.14f, 1f);
-        cam.fieldOfView = 28f;
-        cam.nearClipPlane = 0.1f;
-        cam.farClipPlane = 12f;
-        cam.depth = -10;
-        cam.allowHDR = false;
-        cam.allowMSAA = false;
-        var extra = cam.GetUniversalAdditionalCameraData();
-        extra.renderType = CameraRenderType.Base;
-        extra.renderPostProcessing = false;
-
-        _rt = new RenderTexture(1024, 1024, 16);
-        _rt.Create();
-        cam.targetTexture = _rt;
-        if (modelView != null)
-            modelView.texture = _rt;
-
-        var lightGo = new GameObject("RevealLight");
-        lightGo.transform.SetParent(stage, false);
-        lightGo.transform.localPosition = new Vector3(-0.6f, 1.1f, -1.2f);
-        var light = lightGo.AddComponent<Light>();
-        light.type = LightType.Point;
-        light.range = 8f;
-        light.intensity = 4.2f;
-        light.color = new Color(1f, 0.92f, 0.95f);
+        if (modelView == null || revealCamera == null || revealCamera.targetTexture == null)
+            return;
+        modelView.texture = revealCamera.targetTexture;
     }
 
     void ResolveSceneRefs()
@@ -260,6 +211,20 @@ public class PhobiaReveal : MonoBehaviour
             var found = transform.Find("PhobiaReveal");
             if (found != null)
                 overlay = found.gameObject;
+        }
+
+        if (pivot == null && game != null)
+        {
+            var found = game.transform.Find("RevealStage/Pivot");
+            if (found != null)
+                pivot = found;
+        }
+
+        if (revealCamera == null && pivot != null)
+        {
+            var cam = pivot.parent != null ? pivot.parent.GetComponentInChildren<Camera>(true) : null;
+            if (cam != null)
+                revealCamera = cam;
         }
 
         if (overlay == null)

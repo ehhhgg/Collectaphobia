@@ -50,11 +50,6 @@ public class ClickerCatalog : ScriptableObject
         return null;
     }
 
-    public PhobiaDefinition PhobiaOf(Rarity rarity)
-    {
-        return RandomPhobiaOf(rarity);
-    }
-
     public PhobiaDefinition RandomPhobiaOf(Rarity rarity)
     {
         var match = Pick(rarity, true);

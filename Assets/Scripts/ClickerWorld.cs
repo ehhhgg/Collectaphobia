@@ -127,7 +127,7 @@ public class ClickerWorld : MonoBehaviour
 
         def = catalog != null ? catalog.PhobiaById(hit.ContainedId) : null;
         if (def == null && catalog != null)
-            def = catalog.PhobiaOf(hit.ContainedRarity);
+            def = catalog.RandomPhobiaOf(hit.ContainedRarity);
         StartCoroutine(OpenBall(hit, def));
         return true;
     }
@@ -244,12 +244,15 @@ public class ClickerWorld : MonoBehaviour
 
         GameObject relic = null;
         var fullScale = Vector3.one;
+        var sit = slot;
         if (def != null && def.prefab != null)
         {
             relic = Instantiate(def.prefab, slot, def.prefab.transform.rotation, shelf);
             relic.name = def.Label;
+            sit = SitOnShelf(relic, slot);
             fullScale = relic.transform.localScale;
             relic.transform.localScale = Vector3.zero;
+            relic.transform.position = sit;
             _shelfItems.Add(relic);
         }
 
@@ -265,7 +268,7 @@ public class ClickerWorld : MonoBehaviour
             {
                 var pop = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((u - 0.2f) / 0.8f));
                 relic.transform.localScale = fullScale * pop;
-                relic.transform.position = slot + Vector3.up * (Mathf.Sin(pop * Mathf.PI) * 0.35f);
+                relic.transform.position = sit + Vector3.up * (Mathf.Sin(pop * Mathf.PI) * 0.35f);
             }
 
             yield return null;
@@ -276,7 +279,7 @@ public class ClickerWorld : MonoBehaviour
 
         if (relic != null)
         {
-            relic.transform.position = slot;
+            relic.transform.position = sit;
             relic.transform.localScale = fullScale;
         }
 
@@ -288,6 +291,34 @@ public class ClickerWorld : MonoBehaviour
         var col = _nextSlot % ShelfColumns;
         _nextSlot++;
         return shelf.TransformPoint(new Vector3((col - 2) * 0.52f, 0.22f, 0f));
+    }
+
+    Vector3 SitOnShelf(GameObject go, Vector3 xz)
+    {
+        go.transform.position = xz;
+        var renderers = go.GetComponentsInChildren<Renderer>();
+        if (renderers.Length == 0)
+            return xz;
+
+        var bounds = renderers[0].bounds;
+        for (var i = 1; i < renderers.Length; i++)
+            bounds.Encapsulate(renderers[i].bounds);
+
+        var surface = ShelfSurfaceY();
+        go.transform.position += Vector3.up * (surface - bounds.min.y);
+        return go.transform.position;
+    }
+
+    float ShelfSurfaceY()
+    {
+        if (shelf == null)
+            return 0f;
+
+        var plank = shelf.GetComponentInChildren<Renderer>();
+        if (plank != null)
+            return plank.bounds.max.y;
+
+        return shelf.position.y;
     }
 
     void TrimOpenedPhobias()

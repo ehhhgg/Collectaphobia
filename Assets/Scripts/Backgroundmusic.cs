@@ -5,7 +5,6 @@ public class BackgroundMusic : MonoBehaviour
 {
    
     [SerializeField] private AudioClip musicClip;
-    [Range(0f, 1f)][SerializeField] private float volume = 0.6f;
 
     private const string DefaultClipName = "ES_They_Come_at_Night_edit_-_Etienne_Roussel";
 
@@ -36,9 +35,27 @@ public class BackgroundMusic : MonoBehaviour
 
         AudioSource source = GetComponent<AudioSource>();
         source.clip = musicClip;
-        source.loop = true;          
-        source.volume = volume;
+        source.loop = true;
         source.playOnAwake = false;
+        ApplyVolume();
         source.Play();
+    }
+
+    void OnEnable()
+    {
+        GameAudio.Changed += ApplyVolume;
+        ApplyVolume();
+    }
+
+    void OnDisable()
+    {
+        GameAudio.Changed -= ApplyVolume;
+    }
+
+    void ApplyVolume()
+    {
+        var source = GetComponent<AudioSource>();
+        if (source != null)
+            source.volume = GameAudio.MusicOutput;
     }
 }

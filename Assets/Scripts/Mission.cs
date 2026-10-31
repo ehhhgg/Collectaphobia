@@ -71,8 +71,6 @@ public static class MissionRules
         new(HaulId, "Long Haul", TimeSpan.FromHours(1), 120f)
     };
 
-    public static readonly TimeSpan GatherDuration = Jobs[0].duration;
-
     public static JobDefinition JobById(string id)
     {
         if (string.IsNullOrEmpty(id) || id == GatherId)

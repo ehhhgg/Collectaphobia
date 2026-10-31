@@ -145,78 +145,11 @@ public class CollectionScreen : MonoBehaviour, IPhobiaRowHost
 
     void RefreshRows()
     {
-        var catalog = game != null ? game.Catalog : null;
         foreach (var row in _rows)
-            RefreshRow(row, catalog);
-    }
-
-    void RefreshRow(CollectionRow row, ClickerCatalog catalog)
-    {
-        if (row == null || game == null)
-            return;
-
-        var def = catalog != null ? catalog.PhobiaById(row.phobiaId) : null;
-        var count = def != null ? game.State.PhobiaCount(def.id) : 0;
-        var found = count > 0;
-        var selected = found && row.phobiaId == _selectedId;
-        var color = def != null ? RarityStyle.Color(def.rarity) : Color.white;
-        var mission = game.State.MissionFor(row.phobiaId);
-
-        if (row.background != null)
         {
-            if (selected)
-                row.background.color = new Color(color.r, color.g, color.b, 0.42f);
-            else if (found)
-                row.background.color = new Color(color.r, color.g, color.b, 0.18f);
-            else
-                row.background.color = new Color(0.12f, 0.1f, 0.16f, 0.9f);
+            if (row != null)
+                row.Refresh(game, _selectedId);
         }
-
-        if (row.nameText != null)
-        {
-            row.nameText.text = found && def != null ? def.Label : "????";
-            row.nameText.color = found ? Color.white : new Color(1f, 1f, 1f, 0.35f);
-        }
-
-        if (row.rarityText != null)
-        {
-            if (mission != null && mission.IsComplete)
-            {
-                row.rarityText.text = "READY TO CLAIM";
-                row.rarityText.color = Accent;
-            }
-            else if (mission != null)
-            {
-                var job = MissionRules.JobById(mission.missionId);
-                row.rarityText.text = $"{job.displayName.ToUpper()}  {MissionRules.FormatRemaining(mission.Remaining)}";
-                row.rarityText.color = color;
-            }
-            else
-            {
-                row.rarityText.text = found && def != null ? RarityStyle.Label(def.rarity) : "LOCKED";
-                row.rarityText.color = found ? color : new Color(1f, 1f, 1f, 0.28f);
-            }
-        }
-
-        if (row.countText != null)
-        {
-            row.countText.text = found ? $"×{count}" : "";
-            row.countText.color = found ? color : Color.clear;
-        }
-
-        if (row.art != null)
-        {
-            var art = found && def != null ? def.art : null;
-            row.art.texture = art;
-            row.art.color = art != null ? Color.white : new Color(0.2f, 0.18f, 0.24f, 1f);
-        }
-
-        if (row.inspectButton != null)
-            row.inspectButton.interactable = found;
-        if (row.inspectImage != null)
-            row.inspectImage.color = found ? Accent : new Color(0.3f, 0.28f, 0.34f, 1f);
-        if (row.inspectLabel != null)
-            row.inspectLabel.color = found ? Color.white : new Color(1f, 1f, 1f, 0.35f);
     }
 
     void RefreshTab()
@@ -249,7 +182,7 @@ public class CollectionScreen : MonoBehaviour, IPhobiaRowHost
         HideMergeConfirm();
 
         if (overlay == null)
-            Debug.LogError("CollectionScreen has no overlay in the scene. Run Phobia/Sync Collection Screen.", this);
+            Debug.LogError("CollectionScreen has no overlay in the scene.", this);
     }
 
     public void ShowMergeConfirm()
