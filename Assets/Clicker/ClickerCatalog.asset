@@ -21,22 +21,13 @@ MonoBehaviour:
     artist: Paige
     description: This clown wears a frown.
     notes: 
-  - id: pyrophobia
-    displayName: Pyrophobia
-    rarity: 1
-    art: {fileID: 2800000, guid: c3013b5e318214d4881c3eb377b49e76, type: 3}
-    prefab: {fileID: 1194536141242494251, guid: ba60c35e40c68ca47b4f1ce775247581, type: 3}
-    artist: Jadyn
-    description: Ironically chill for a hothead, no?
-    notes: 
   - id: chionophobia
     displayName: Chionophobia
     rarity: 2
     art: {fileID: 2800000, guid: 5e72cfb554963fc4e9206713c1bf10af, type: 3}
     prefab: {fileID: 1194536141242494251, guid: 4179b7fc6a2e9f44997bc6d87801ecf8, type: 3}
     artist: Paige
-    description: This night brings goosebumps. Is he really as cold as they say or
-      is it ironic?
+    description: Welcome, to the HIMALAYAS!
     notes: 
   - id: anthophobia
     displayName: Anthophobia
@@ -44,7 +35,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: acf6fbb0ac835564bb5bb08ec38894e7, type: 3}
     prefab: {fileID: 3642706640357103728, guid: 499c3ea333d426d42b262f615b237c67, type: 3}
     artist: Andrew
-    description: 
+    description: Howdy! It's me!
     notes: 
   - id: ablutophobia
     displayName: Ablutophobia
@@ -81,7 +72,7 @@ MonoBehaviour:
   - id: musophobia
     displayName: Musophobia
     rarity: 0
-    art: {fileID: 2800000, guid: f525d93ccac285f448fa6e69566bcd5f, type: 3}
+    art: {fileID: 2800000, guid: 13604488f133a7048a3e742d47ce5909, type: 3}
     prefab: {fileID: 5118062157546847804, guid: 541a5e682e156ce4cb5e268bebeb9a28, type: 3}
     artist: Paige
     description: Tell me where the cheese is. Don't worry I won't rat you out.
@@ -89,7 +80,7 @@ MonoBehaviour:
   - id: pediaphobia
     displayName: Pediaphobia
     rarity: 4
-    art: {fileID: 2800000, guid: 7732f32807aae404ebf116faf0b0e599, type: 3}
+    art: {fileID: 2800000, guid: bf63dbc7f327ccf41aacfb3e06bac5d0, type: 3}
     prefab: {fileID: 1878794337509686517, guid: d7de767262a78a14d8a836092ceca373, type: 3}
     artist: Paige
     description: 
@@ -116,7 +107,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 6593552be38332d41809722ee19787db, type: 3}
     prefab: {fileID: 5608036746083880643, guid: 1a8f1c774a5404345930bf3409383571, type: 3}
     artist: Jose
-    description: 
+    description: Hope you learned how to swim...
     notes: 
   - id: batrachophobia
     displayName: Batrachophobia
@@ -141,7 +132,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 4c24b85b864d80f4895a0b6c66ea9b9a, type: 3}
     prefab: {fileID: 816193545376729137, guid: 69c326436f6f4f74b8b2cc11eda2e214, type: 3}
     artist: Jose
-    description: 
+    description: Blue, ready to beat bad guys up!
     notes: 
   - id: erythrophobia
     displayName: Erythrophobia
@@ -149,7 +140,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: a1909c3595ba3744581bdb7967377119, type: 3}
     prefab: {fileID: 3897754769261181259, guid: 04e10bd61a840dd42b9acfed1d5bad60, type: 3}
     artist: Jose
-    description: 
+    description: Red, here to save the day!
     notes: 
   - id: prasinophobia
     displayName: Prasinophobia
@@ -157,7 +148,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 4fa8b65b524ab344d937ff5bdd775889, type: 3}
     prefab: {fileID: 5579831234238940496, guid: c9f042921f7276d4c8115a5ee1d43e53, type: 3}
     artist: Jose
-    description: 
+    description: Green, going to kick some butt!
     notes: 
   - id: rhodophobia
     displayName: Rhodophobia
@@ -165,7 +156,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: cf1336d8a540ba74fa1991e1935bff75, type: 3}
     prefab: {fileID: 4565043739432032562, guid: d8b43b2f3ebf88140869538e6a4813e2, type: 3}
     artist: Jose
-    description: 
+    description: Pink, here to cause some damage!
     notes: 
   - id: xanthophobia
     displayName: Xanthophobia
@@ -173,7 +164,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 2cae72db92647524683d3af3219dd532, type: 3}
     prefab: {fileID: 6585570340468327974, guid: 0ac188f69aafdb8488596ca14ae114a3, type: 3}
     artist: Jose
-    description: 
+    description: Yellow, here to protect my friends!
     notes: 
   - id: octophobia
     displayName: Octophobia
@@ -197,7 +188,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 6fa4917e99d7c7c49b1ee2267eb64ca6, type: 3}
     prefab: {fileID: 3960504259890984851, guid: adcc84bf217699343b4e3c365854d81f, type: 3}
     artist: Jadyn
-    description: 
+    description: Get with the times RAAAHHH!
     notes: 
   - id: pediophobia
     displayName: Pediophobia
@@ -230,7 +221,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 890678fb80e7bca40afae7f921b56a40, type: 3}
     prefab: {fileID: 7002222954774778852, guid: 0c1609775e6d07b4e9e287195a5f5699, type: 3}
     artist: Jadyn
-    description: 
+    description: Look at me... or don't. But please do.
     notes: 
   - id: samhainiphobia
     displayName: Samhainiphobia
@@ -238,7 +229,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 2d29f896006d1c643bc2379a7cea1348, type: 3}
     prefab: {fileID: 7045727418985008401, guid: c7c35d30f223f1d45970af99a08e2354, type: 3}
     artist: Andrew
-    description: Tricks or it didn't happen.
+    description: Trick or treat!
     notes: 
   - id: angrophobia
     displayName: Angrophobia
@@ -246,7 +237,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 31b74c146c253ea4184697952a895f11, type: 3}
     prefab: {fileID: 8694728690990007097, guid: 623af9e99c0ec1c4e89fe83133332eda, type: 3}
     artist: Andrew
-    description: 
+    description: This narrative... makes me so... ANGRY!!!
     notes: 
   - id: anatidaephobia
     displayName: Anatidaephobia
@@ -262,8 +253,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: fe00235201cc3a3458553a132061ff7a, type: 3}
     prefab: {fileID: 5212131633110528935, guid: 351586fc42c347e479694cbeaf2a23db, type: 3}
     artist: Jadyn
-    description: As drippy as goop. Hard as peanut brittle. Might want something
-      to wash me down.
+    description: Hope you're not allergic.
     notes: 
   - id: hippopotomonstrosesquippedaliophobia
     displayName: Hippopotomonstrosesquippedaliophobia
@@ -271,7 +261,13 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: bc027bb08d73a0447b14a6195eae2a07, type: 3}
     prefab: {fileID: 3395634900747315052, guid: be97359e055d28e4cb5530be030cc380, type: 3}
     artist: Jadyn
-    description: 
+    description: Truly, what a magnifiscent phobia! Rather, I cannot describe just
+      how much I enjoy looking at it! Just look at how demure it is. Fascinating,
+      really! I mean, I could go on and on about how adorable this phobia truly is!
+      Are you still reading? It really is so magnifiscent, that phobia is! Dare I
+      say, it's the best phobia in the whole game! You don't agree? Well, which one
+      do you like the most? Oh, that one is good too. I really cannot emphasize enough
+      how great this phobia is!
     notes: 
   - id: chaetophobia
     displayName: Chaetophobia
@@ -280,6 +276,86 @@ MonoBehaviour:
     prefab: {fileID: 1070573967190365658, guid: 42c56ddcdc153d549a26d8c48fb0f3d8, type: 3}
     artist: Andrew
     description: 
+    notes: 
+  - id: zoophobia
+    displayName: Zoophobia
+    rarity: 0
+    art: {fileID: 2800000, guid: 337f221303db42a438e753c86f016e78, type: 3}
+    prefab: {fileID: 2529043834934148746, guid: 5d4249282f5e7ca4b99b37aed64619ba, type: 3}
+    artist: Paige
+    description: What exactly is this thing?
+    notes: 
+  - id: claustrophobia
+    displayName: Claustrophobia
+    rarity: 0
+    art: {fileID: 2800000, guid: ea87daa0a0ccd4d47b6f0be9f3bff4f1, type: 3}
+    prefab: {fileID: 1608997081372038078, guid: 62349b4c1c4499947895de52ab68acad, type: 3}
+    artist: Jose
+    description: This narrative feels a little cramped.
+    notes: 
+  - id: aerophobia
+    displayName: Aerophobia
+    rarity: 1
+    art: {fileID: 2800000, guid: 42017e9c472b3b94db58f711fe74fb25, type: 3}
+    prefab: {fileID: 4304488444227068175, guid: a93a24452368e7e43b0b08799c531cb6, type: 3}
+    artist: Ryan
+    description: Hope you can handle heights because we are taking to the skies.
+    notes: 
+  - id: placophobia
+    displayName: Placophobia
+    rarity: 1
+    art: {fileID: 2800000, guid: 139f3731b257e4c489cc0d6659b9cb4a, type: 3}
+    prefab: {fileID: 9133658943413875136, guid: 9540cb1f199f02d4684f76a43f5e42e9, type: 3}
+    artist: Jose
+    description: Here lies... YOU!
+    notes: 
+  - id: dendrophobia
+    displayName: Dendrophobia
+    rarity: 2
+    art: {fileID: 2800000, guid: d05a5a5640814494e82b0587c92641c4, type: 3}
+    prefab: {fileID: 2771965858730767352, guid: 257d253ffb685ad4fbd92c1cbc305f27, type: 3}
+    artist: Jose
+    description: My bark is worse than my bite.
+    notes: 
+  - id: acousticophobia
+    displayName: Acousticophobia
+    rarity: 2
+    art: {fileID: 2800000, guid: aab45e5be63213b48bc1b9f266d6b0f4, type: 3}
+    prefab: {fileID: 8489631677210703341, guid: e772759afdb32be42b846f32b7df3326, type: 3}
+    artist: Ryan
+    description: You know I like it loud! Turn itUp!
+    notes: 
+  - id: electrophobia
+    displayName: Electrophobia
+    rarity: 2
+    art: {fileID: 2800000, guid: 62b46bd68d439ab458d00770873aec3b, type: 3}
+    prefab: {fileID: 8996557264804783030, guid: 0eba79fa7b8bccd4eb74964cdcb1625b, type: 3}
+    artist: Jose
+    description: Quite the shock!
+    notes: 
+  - id: pyrophobia
+    displayName: Pyrophobia
+    rarity: 1
+    art: {fileID: 2800000, guid: c3013b5e318214d4881c3eb377b49e76, type: 3}
+    prefab: {fileID: 996856427541347478, guid: ba60c35e40c68ca47b4f1ce775247581, type: 3}
+    artist: Jadyn
+    description: Woah mama, why am I SO HOT?!
+    notes: 
+  - id: chromophobia
+    displayName: Chromophobia
+    rarity: 4
+    art: {fileID: 2800000, guid: fbc6c6028092f0f4ca3fd3ab89b683d6, type: 3}
+    prefab: {fileID: 7748095536481102836, guid: 84ef83c87f4a202488a70948d995b8f6, type: 3}
+    artist: Ryan
+    description: 
+    notes: 
+  - id: optophobia
+    displayName: Optophobia
+    rarity: 4
+    art: {fileID: 2800000, guid: d25912088081e214da3de20c71650574, type: 3}
+    prefab: {fileID: 2772690672461094815, guid: 1828f25f7c958d54ebca45f769487e2b, type: 3}
+    artist: Paige
+    description: I can't look, it's too scary!!
     notes: 
   autoClickers:
   - id: flicker
