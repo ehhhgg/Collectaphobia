@@ -17,6 +17,7 @@ public class PhobiaDefinition
     public string notes;
 
     public string Label => string.IsNullOrWhiteSpace(displayName) ? RarityStyle.Label(rarity) : displayName;
+    public bool IsSecret => rarity == Rarity.Secret;
 }
 
 [Serializable]
@@ -71,7 +72,7 @@ public class ClickerCatalog : ScriptableObject
         for (var i = 0; i < phobias.Length; i++)
         {
             var def = phobias[i];
-            if (def != null && def.prefab != null && def.rarity == rarity)
+            if (def != null && def.prefab != null && def.rarity == rarity && !def.IsSecret)
                 return true;
         }
 
@@ -89,7 +90,7 @@ public class ClickerCatalog : ScriptableObject
         for (var i = 0; i < phobias.Length; i++)
         {
             var def = phobias[i];
-            if (def == null || def.prefab == null)
+            if (def == null || def.prefab == null || def.IsSecret)
                 continue;
             if (requireMatch && def.rarity != rarity)
                 continue;

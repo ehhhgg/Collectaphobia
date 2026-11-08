@@ -6,11 +6,14 @@ public enum Rarity
     Uncommon,
     Rare,
     Epic,
-    Legendary
+    Legendary,
+    Secret
 }
 
 public static class RarityStyle
 {
+    public static bool IsSecret(Rarity rarity) => rarity == Rarity.Secret;
+
     public static Color Color(Rarity rarity)
     {
         return rarity switch
@@ -20,6 +23,7 @@ public static class RarityStyle
             Rarity.Rare => new Color(0.32f, 0.58f, 1f),
             Rarity.Epic => new Color(0.78f, 0.38f, 1f),
             Rarity.Legendary => new Color(1f, 0.78f, 0.22f),
+            Rarity.Secret => new Color(0.86f, 0.74f, 0.42f),
             _ => UnityEngine.Color.white
         };
     }
@@ -33,7 +37,7 @@ public static class MergeRules
 
     public static bool TryNextRarity(Rarity rarity, out Rarity next)
     {
-        if (rarity >= Rarity.Legendary)
+        if (rarity == Rarity.Secret || rarity >= Rarity.Legendary)
         {
             next = rarity;
             return false;

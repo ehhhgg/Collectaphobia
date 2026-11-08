@@ -120,19 +120,34 @@ public class CollectionScreen : MonoBehaviour, IPhobiaRowHost
             _selectedId = null;
 
         var catalog = game.Catalog;
-        var total = catalog != null && catalog.phobias != null ? catalog.phobias.Length : 0;
+        var total = 0;
         var unlocked = 0;
+        var secrets = 0;
         if (catalog != null && catalog.phobias != null)
         {
             foreach (var def in catalog.phobias)
             {
-                if (def != null && game.State.PhobiaCount(def.id) > 0)
+                if (def == null || string.IsNullOrEmpty(def.id))
+                    continue;
+                if (def.IsSecret)
+                {
+                    if (game.State.PhobiaCount(def.id) > 0)
+                        secrets++;
+                    continue;
+                }
+
+                total++;
+                if (game.State.PhobiaCount(def.id) > 0)
                     unlocked++;
             }
         }
 
         if (progressText != null)
-            progressText.text = $"{unlocked} / {total} unlocked";
+        {
+            progressText.text = secrets > 0
+                ? $"{unlocked} / {total} unlocked  +{secrets} secret{(secrets == 1 ? "" : "s")}"
+                : $"{unlocked} / {total} unlocked";
+        }
 
         RefreshRows();
         RefreshMerge();

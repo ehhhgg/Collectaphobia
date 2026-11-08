@@ -73,8 +73,17 @@ public class AscensionSystem : MonoBehaviour
     int OwnedCount()
     {
         var owned = 0;
+        var catalog = game != null ? game.Catalog : null;
         foreach (var pair in game.State.PhobiaCounts)
-            if (pair.Value > 0) owned++;
+        {
+            if (pair.Value <= 0)
+                continue;
+            var def = catalog != null ? catalog.PhobiaById(pair.Key) : null;
+            if (def != null && def.IsSecret)
+                continue;
+            owned++;
+        }
+
         return owned;
     }
 

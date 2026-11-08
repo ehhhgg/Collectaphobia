@@ -44,7 +44,7 @@ public class PhobiaCatalogWindow : EditorWindow
         EditorGUILayout.Space(8);
         EditorGUILayout.LabelField("Add Phobia Characters", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(
-            "Add a named phobia to the catalog. Use 2D art, a 3D model, or both. The 3D model is what appears on the shelf and in inspect. If you only add 2D art, a double-sided plane is created from it. 2D art is also used in the collection list. Adding or removing a phobia updates collection rows in the loaded scene so the UI team can edit them in the hierarchy.",
+            "Add a named phobia to the catalog. Use 2D art, a 3D model, or both. The 3D model is what appears on the shelf and in inspect. If you only add 2D art, a double-sided plane is created from it. 2D art is also used in the collection list. Secret rarity is collection-only: it never drops from the machine. Place a SecretPickup on the object players click. Adding or removing a phobia updates collection rows in the loaded scene.",
             MessageType.Info);
 
         EditorGUI.BeginChangeCheck();
@@ -346,7 +346,7 @@ public class PhobiaCatalogWindow : EditorWindow
 
     static void ApplyCardShape(GameObject go, Rarity rarity)
     {
-        var height = rarity == Rarity.Legendary ? 0.78f : 0.64f;
+        var height = rarity is Rarity.Legendary or Rarity.Secret ? 0.78f : 0.64f;
         go.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
         go.transform.localScale = new Vector3(height * 0.75f, height, 1f);
 

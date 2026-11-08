@@ -82,6 +82,7 @@ public class ClickerGame : MonoBehaviour
     public void AfterSaveRestored()
     {
         Notify();
+        SecretPickup.RefreshAll(this);
     }
 
     public void ResetProgress()
@@ -94,6 +95,26 @@ public class ClickerGame : MonoBehaviour
             world.ClearDrops();
 
         Notify();
+        SecretPickup.RefreshAll(this);
+    }
+
+    public bool TryCollectSecret(string phobiaId)
+    {
+        if (catalog == null || string.IsNullOrEmpty(phobiaId))
+            return false;
+
+        var def = catalog.PhobiaById(phobiaId);
+        if (def == null || !def.IsSecret)
+            return false;
+        if (State.PhobiaCount(def.id) > 0)
+            return false;
+
+        State.AddPhobia(def.id, def.rarity);
+        if (hud != null)
+            hud.ShowFirstUnlock(def);
+        Notify();
+        SecretPickup.RefreshAll(this);
+        return true;
     }
 
     public bool TryBuy(string autoId)
@@ -118,7 +139,7 @@ public class ClickerGame : MonoBehaviour
             return false;
 
         var def = catalog.PhobiaById(phobiaId);
-        if (def == null || State.PhobiaCount(phobiaId) <= 0)
+        if (def == null || def.IsSecret || State.PhobiaCount(phobiaId) <= 0)
             return false;
         var job = MissionRules.JobById(jobId);
         if (State.IsPhobiaOnMission(phobiaId))
@@ -173,6 +194,12 @@ public class ClickerGame : MonoBehaviour
         if (def == null || State.PhobiaCount(phobiaId) <= 0)
         {
             reason = "Select an unlocked phobia to merge.";
+            return false;
+        }
+
+        if (def.IsSecret)
+        {
+            reason = "Secret phobias cannot be merged.";
             return false;
         }
 

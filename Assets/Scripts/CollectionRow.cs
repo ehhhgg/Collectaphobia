@@ -41,7 +41,7 @@ public class CollectionRow : MonoBehaviour
         _host?.Inspect(phobiaId);
     }
 
-    public void Refresh(ClickerGame game, string selectedId)
+    public void Refresh(ClickerGame game, string selectedId, bool hideSecrets = false)
     {
         if (game == null)
             return;
@@ -50,6 +50,14 @@ public class CollectionRow : MonoBehaviour
         var def = catalog != null ? catalog.PhobiaById(phobiaId) : null;
         var count = def != null ? game.State.PhobiaCount(def.id) : 0;
         var found = count > 0;
+        if (def != null && def.IsSecret && (hideSecrets || !found))
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
+        if (!gameObject.activeSelf)
+            gameObject.SetActive(true);
         var selected = found && phobiaId == selectedId;
         var color = def != null ? RarityStyle.Color(def.rarity) : Color.white;
         var mission = game.State.MissionFor(phobiaId);

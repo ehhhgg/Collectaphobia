@@ -114,7 +114,7 @@ public class WorkScreen : MonoBehaviour, IPhobiaRowHost
         foreach (var row in _rows)
         {
             if (row != null)
-                row.Refresh(game, _selectedId);
+                row.Refresh(game, _selectedId, hideSecrets: true);
         }
 
         if (emptyText != null)

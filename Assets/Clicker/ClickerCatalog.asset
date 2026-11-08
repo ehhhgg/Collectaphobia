@@ -281,6 +281,14 @@ MonoBehaviour:
     artist: Andrew
     description: 
     notes: 
+  - id: bibliophobia
+    displayName: Bibliophobia
+    rarity: 5
+    art: {fileID: 2800000, guid: 9ece162060329c34e89c16404f4bbb2d, type: 3}
+    prefab: {fileID: 2741850392168471501, guid: 8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d, type: 3}
+    artist: Connor
+    description: A book left in the credits. Don't read it.
+    notes: Secret. Click the book in Credits.
   autoClickers:
   - id: flicker
     displayName: Flicker

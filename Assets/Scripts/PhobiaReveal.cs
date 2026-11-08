@@ -70,7 +70,7 @@ public class PhobiaReveal : MonoBehaviour
             return;
         }
 
-        Display(def, firstUnlock ? "NEW PHOBIA" : "INSPECT");
+        Display(def, firstUnlock ? UnlockBanner(def) : "INSPECT");
     }
 
     public void ShowMerge(PhobiaDefinition def, bool firstUnlock)
@@ -80,7 +80,7 @@ public class PhobiaReveal : MonoBehaviour
 
         ResolveSceneRefs();
         BindModelView();
-        Display(def, firstUnlock ? "NEW PHOBIA" : "MERGE RESULT");
+        Display(def, firstUnlock ? UnlockBanner(def) : "MERGE RESULT");
     }
 
     public void Close()
@@ -95,6 +95,11 @@ public class PhobiaReveal : MonoBehaviour
         _open = false;
         if (overlay != null)
             overlay.SetActive(false);
+    }
+
+    static string UnlockBanner(PhobiaDefinition def)
+    {
+        return def != null && def.IsSecret ? "SECRET PHOBIA" : "NEW PHOBIA";
     }
 
     void Display(PhobiaDefinition def, string banner)
