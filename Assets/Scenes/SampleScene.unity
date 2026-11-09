@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 3141815}
   - component: {fileID: 3141814}
   - component: {fileID: 3141817}
+  - component: {fileID: 3141818}
   m_Layer: 0
   m_Name: Clicker
   m_TagString: Untagged
@@ -204,6 +205,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SaveSystem
   game: {fileID: 3141815}
   hud: {fileID: 1235305649}
+--- !u!114 &3141818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3141813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e4c1a92b8d04f6e9c3a5b7d1e0f2468, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SaveResetCheat
+  save: {fileID: 3141817}
+  hud: {fileID: 1235305649}
+  keyTimeout: 1.5
+  touchFingers: 3
+  touchHoldSeconds: 2
 --- !u!1 &1987100101
 GameObject:
   m_ObjectHideFlags: 0

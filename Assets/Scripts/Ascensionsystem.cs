@@ -23,7 +23,7 @@ public class AscensionSystem : MonoBehaviour
     void Awake()
     {
         if (game == null)
-            game = FindFirstObjectByType<ClickerGame>();
+            game = FindAnyObjectByType<ClickerGame>();
 
         Count = PlayerPrefs.GetInt(CountKey, 0);
     }

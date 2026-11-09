@@ -27,7 +27,6 @@ public class MissionRecord
     }
 }
 
-[Serializable]
 public class JobDefinition
 {
     public string id;

@@ -7,7 +7,7 @@ public class ClickerGame : MonoBehaviour
     [SerializeField] ClickerHud hud;
     [SerializeField] ClickerCatalog catalog;
 
-    public readonly GameState State = new();
+    [NonSerialized] public readonly GameState State = new();
     public ClickerCatalog Catalog => catalog;
     public int PendingCount => world != null ? world.PendingCount : 0;
 

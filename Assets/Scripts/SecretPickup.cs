@@ -10,7 +10,7 @@ public class SecretPickup : MonoBehaviour
     void Awake()
     {
         if (game == null)
-            game = FindFirstObjectByType<ClickerGame>();
+            game = FindAnyObjectByType<ClickerGame>();
         if (button == null)
             button = GetComponent<Button>();
         if (button != null)
@@ -42,7 +42,7 @@ public class SecretPickup : MonoBehaviour
         if (game == null)
             return;
 
-        var pickups = FindObjectsByType<SecretPickup>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        var pickups = FindObjectsByType<SecretPickup>(FindObjectsInactive.Include);
         for (var i = 0; i < pickups.Length; i++)
         {
             if (pickups[i] != null)
