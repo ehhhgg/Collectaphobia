@@ -51,7 +51,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 624b66f512905cf4f8ece3f6b71435f0, type: 3}
     prefab: {fileID: 85402292314405781, guid: 03835eaeb6b192746aebedc7ed656825, type: 3}
     artist: Andrew
-    description: 
+    description: Come into the Big Top, if you dare.
     notes: 
   - id: chronomentrophobia
     displayName: Chronomentrophobia
@@ -59,7 +59,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 34b22f70c05a6894d9a29cdf9e8af191, type: 3}
     prefab: {fileID: 7013334457655728720, guid: 9afb25ece0f637f4e860ac3b8a3f62f8, type: 3}
     artist: 
-    description: 
+    description: Time crawls on with or without you.
     notes: 
   - id: dentophobia
     displayName: Dentophobia
@@ -69,29 +69,13 @@ MonoBehaviour:
     artist: Jadyn
     description: Gloves? Check. Scalers? Check. Now say ahhhhhh.
     notes: 
-  - id: musophobia
-    displayName: Musophobia
-    rarity: 0
-    art: {fileID: 2800000, guid: 13604488f133a7048a3e742d47ce5909, type: 3}
-    prefab: {fileID: 5118062157546847804, guid: 541a5e682e156ce4cb5e268bebeb9a28, type: 3}
-    artist: Paige
-    description: Tell me where the cheese is. Don't worry I won't rat you out.
-    notes: 
-  - id: pediaphobia
-    displayName: Pediaphobia
-    rarity: 4
-    art: {fileID: 2800000, guid: bf63dbc7f327ccf41aacfb3e06bac5d0, type: 3}
-    prefab: {fileID: 1878794337509686517, guid: d7de767262a78a14d8a836092ceca373, type: 3}
-    artist: Paige
-    description: 
-    notes: 
   - id: phasmophobia
     displayName: Phasmophobia
     rarity: 0
     art: {fileID: 2800000, guid: 105e38118b274394ca59c555b50d39ad, type: 3}
     prefab: {fileID: 1115523386803954613, guid: ec8f99b60107c974e84227f103698fc8, type: 3}
     artist: Jadyn
-    description: 
+    description: Boooooooo to yooooooouuu.
     notes: 
   - id: robotophobia
     displayName: Robotophobia
@@ -275,7 +259,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: 3a93f2de5b64a4a4e970a36f86b8892c, type: 3}
     prefab: {fileID: 1070573967190365658, guid: 42c56ddcdc153d549a26d8c48fb0f3d8, type: 3}
     artist: Andrew
-    description: 
+    description: I'm just a hairy lil guy,
     notes: 
   - id: bibliophobia
     displayName: Bibliophobia
@@ -355,7 +339,7 @@ MonoBehaviour:
     art: {fileID: 2800000, guid: fbc6c6028092f0f4ca3fd3ab89b683d6, type: 3}
     prefab: {fileID: 7748095536481102836, guid: 84ef83c87f4a202488a70948d995b8f6, type: 3}
     artist: Ryan
-    description: 
+    description: 'Together, we colors form the Prismatron. '
     notes: 
   - id: optophobia
     displayName: Optophobia
@@ -364,6 +348,56 @@ MonoBehaviour:
     prefab: {fileID: 2772690672461094815, guid: 1828f25f7c958d54ebca45f769487e2b, type: 3}
     artist: Paige
     description: I can't look, it's too scary!!
+    notes: 
+  - id: aquaphobia
+    displayName: Aquaphobia
+    rarity: 1
+    art: {fileID: 2800000, guid: 509cc732fcbf3cc4ab9730a73a3098d4, type: 3}
+    prefab: {fileID: 2712388046249003665, guid: 26a0dbf48fb55be418247c70931f743c, type: 3}
+    artist: Andrew
+    description: Are you telling me THAT makes up 60% of my body??
+    notes: 
+  - id: botanophobia
+    displayName: Botanophobia
+    rarity: 3
+    art: {fileID: 2800000, guid: aa48f7f0273dd1f44baf0fca72003089, type: 3}
+    prefab: {fileID: 4865473065123159981, guid: 103ae18a9d7dfee47823a216844c64e9, type: 3}
+    artist: Andrew
+    description: The root of all evil is a green plant that just does not leaf you
+      alone.
+    notes: 
+  - id: daemonophobia
+    displayName: Daemonophobia
+    rarity: 3
+    art: {fileID: 2800000, guid: 4747b4b3feb8a894f9d6b94b84b49934, type: 3}
+    prefab: {fileID: 2738290263314832509, guid: 327cf08ec0e2e5645ace4cc1069a0680, type: 3}
+    artist: Andrew
+    description: I make one Hell of of an Introduction.
+    notes: 
+  - id: kinemortophobia
+    displayName: Kinemortophobia
+    rarity: 2
+    art: {fileID: 2800000, guid: f017c9168100c374eaae4f6bf25d8b12, type: 3}
+    prefab: {fileID: 2915010424470910625, guid: 961a2c4216774d04fb6535b74d5cb3c6, type: 3}
+    artist: Andrew
+    description: You think I'm scary? Have you tried chasing someone at a brisk shuffle?
+    notes: 
+  - id: astraphobia
+    displayName: Astraphobia
+    rarity: 0
+    art: {fileID: 2800000, guid: b8f7606c976f8ef4d8e76c1b99a72c1e, type: 3}
+    prefab: {fileID: 4805218532497539186, guid: 0a0bb07285edc10439cf370b7f51f42a, type: 3}
+    artist: Andrew
+    description: I make one crack of thunder and suddenly my social climate turns
+      pretty stormy.
+    notes: 
+  - id: musophobia
+    displayName: Musophobia
+    rarity: 0
+    art: {fileID: 2800000, guid: 13604488f133a7048a3e742d47ce5909, type: 3}
+    prefab: {fileID: 1023731721203146344, guid: 541a5e682e156ce4cb5e268bebeb9a28, type: 3}
+    artist: Paige
+    description: Tell me where the cheese is. Don't worry I won't rat you out.
     notes: 
   autoClickers:
   - id: flicker
