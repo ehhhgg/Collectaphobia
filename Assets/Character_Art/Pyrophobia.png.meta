@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< Updated upstream:Assets/Character_Art/Pyrophobia.png.meta
 guid: 850aefd911fcd3a4d890edbcaa9204d0
+========
+guid: c1e53b53df401e04d9ec331c50203cf8
+>>>>>>>> Stashed changes:Assets/UI Elements/Courage Bar.png.meta
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
