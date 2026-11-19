@@ -95,7 +95,8 @@ public class CollectionScreen : MonoBehaviour, IPhobiaRowHost
 
     public void Select(string id)
     {
-        if (game == null || game.State.PhobiaCount(id) <= 0)
+        // Count 0 stays selectable so the row art and inspect view can be opened.
+        if (game == null || !game.State.IsPhobiaDiscovered(id))
             return;
         _selectedId = id;
         Refresh();
@@ -103,7 +104,8 @@ public class CollectionScreen : MonoBehaviour, IPhobiaRowHost
 
     public void Inspect(string id)
     {
-        if (game == null || game.State.PhobiaCount(id) <= 0)
+        // ShowInspect keeps the INSPECT banner. It does not replay the new-phobia animation.
+        if (game == null || !game.State.IsPhobiaDiscovered(id))
             return;
         var def = game.Catalog != null ? game.Catalog.PhobiaById(id) : null;
         var hud = GetComponent<ClickerHud>();
@@ -116,7 +118,7 @@ public class CollectionScreen : MonoBehaviour, IPhobiaRowHost
         if (game == null)
             return;
 
-        if (!string.IsNullOrEmpty(_selectedId) && game.State.PhobiaCount(_selectedId) <= 0)
+        if (!string.IsNullOrEmpty(_selectedId) && !game.State.IsPhobiaDiscovered(_selectedId))
             _selectedId = null;
 
         var catalog = game.Catalog;
@@ -131,13 +133,14 @@ public class CollectionScreen : MonoBehaviour, IPhobiaRowHost
                     continue;
                 if (def.IsSecret)
                 {
-                    if (game.State.PhobiaCount(def.id) > 0)
+                    if (game.State.IsPhobiaDiscovered(def.id))
                         secrets++;
                     continue;
                 }
 
                 total++;
-                if (game.State.PhobiaCount(def.id) > 0)
+                // Count 0 is still unlocked. Merging the last copies does not forget it.
+                if (game.State.IsPhobiaDiscovered(def.id))
                     unlocked++;
             }
         }
@@ -163,7 +166,7 @@ public class CollectionScreen : MonoBehaviour, IPhobiaRowHost
         foreach (var row in _rows)
         {
             if (row != null)
-                row.Refresh(game, _selectedId);
+                row.Refresh(game, _selectedId, selectAtZero: true);
         }
     }
 

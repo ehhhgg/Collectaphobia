@@ -19,6 +19,10 @@ public class GameState
     public int PhobiaCount(string id) =>
         !string.IsNullOrEmpty(id) && PhobiaCounts.TryGetValue(id, out var n) ? n : 0;
 
+    // Count 0 stays in the dictionary, so a fully merged phobia is still discovered.
+    public bool IsPhobiaDiscovered(string id) =>
+        !string.IsNullOrEmpty(id) && PhobiaCounts.ContainsKey(id);
+
     public void AddRelic(Rarity rarity)
     {
         Relics[rarity] = RelicCount(rarity) + 1;
@@ -37,9 +41,8 @@ public class GameState
         if (amount <= 0 || PhobiaCount(id) < amount)
             return false;
 
+        // Leave the id at 0. Removing it made the phobia look undiscovered.
         PhobiaCounts[id] = PhobiaCount(id) - amount;
-        if (PhobiaCounts[id] <= 0)
-            PhobiaCounts.Remove(id);
 
         Relics[rarity] = Mathf.Max(0, RelicCount(rarity) - amount);
         return true;
@@ -165,7 +168,8 @@ public class GameState
         {
             foreach (var entry in phobias)
             {
-                if (entry == null || string.IsNullOrEmpty(entry.id) || entry.count <= 0)
+                // Count 0 is a discovered phobia with no copies left.
+                if (entry == null || string.IsNullOrEmpty(entry.id) || entry.count < 0)
                     continue;
                 PhobiaCounts[entry.id] = entry.count;
             }
@@ -193,6 +197,7 @@ public class GameState
 
     public AutoEntry[] SavePhobias()
     {
+        // Includes count 0 so discovery survives a reload.
         var entries = new AutoEntry[PhobiaCounts.Count];
         var i = 0;
         foreach (var pair in PhobiaCounts)

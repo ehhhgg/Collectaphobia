@@ -49,7 +49,7 @@ public class ClickerGame : MonoBehaviour
 
         if (world != null && world.TryOpenBall(out var def) && def != null)
         {
-            var firstTime = State.PhobiaCount(def.id) == 0;
+            var firstTime = !State.IsPhobiaDiscovered(def.id);
             State.AddPhobia(def.id, def.rarity);
             if (firstTime)
                 hud.ShowFirstUnlock(def);
@@ -247,7 +247,7 @@ public class ClickerGame : MonoBehaviour
         if (result == null)
             return false;
 
-        var firstTime = State.PhobiaCount(result.id) == 0;
+        var firstTime = !State.IsPhobiaDiscovered(result.id);
         if (!State.TrySpendPhobias(phobiaId, source.rarity, MergeRules.Cost))
             return false;
 

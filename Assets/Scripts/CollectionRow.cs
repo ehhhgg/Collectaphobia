@@ -41,7 +41,7 @@ public class CollectionRow : MonoBehaviour
         _host?.Inspect(phobiaId);
     }
 
-    public void Refresh(ClickerGame game, string selectedId, bool hideSecrets = false)
+    public void Refresh(ClickerGame game, string selectedId, bool hideSecrets = false, bool selectAtZero = false)
     {
         if (game == null)
             return;
@@ -49,7 +49,11 @@ public class CollectionRow : MonoBehaviour
         var catalog = game.Catalog;
         var def = catalog != null ? catalog.PhobiaById(phobiaId) : null;
         var count = def != null ? game.State.PhobiaCount(def.id) : 0;
-        var found = count > 0;
+        // A discovered phobia stays visible at a count of 0 after every copy is merged.
+        var found = def != null && game.State.IsPhobiaDiscovered(def.id);
+        var owned = count > 0;
+        // The collection can select that row. Work still needs a copy.
+        var selectable = selectAtZero ? found : owned;
         if (def != null && def.IsSecret && (hideSecrets || !found))
         {
             gameObject.SetActive(false);
@@ -58,7 +62,7 @@ public class CollectionRow : MonoBehaviour
 
         if (!gameObject.activeSelf)
             gameObject.SetActive(true);
-        var selected = found && phobiaId == selectedId;
+        var selected = selectable && phobiaId == selectedId;
         var color = def != null ? RarityStyle.Color(def.rarity) : Color.white;
         var mission = game.State.MissionFor(phobiaId);
         var accent = new Color(0.95f, 0.42f, 0.55f);
@@ -113,11 +117,11 @@ public class CollectionRow : MonoBehaviour
         }
 
         if (inspectButton != null)
-            inspectButton.interactable = found;
+            inspectButton.interactable = selectable;
         if (inspectImage != null)
-            inspectImage.color = found ? accent : new Color(0.3f, 0.28f, 0.34f, 1f);
+            inspectImage.color = selectable ? accent : new Color(0.3f, 0.28f, 0.34f, 1f);
         if (inspectLabel != null)
-            inspectLabel.color = found ? Color.white : new Color(1f, 1f, 1f, 0.35f);
+            inspectLabel.color = selectable ? Color.white : new Color(1f, 1f, 1f, 0.35f);
     }
 
     IPhobiaRowHost FindHost()
