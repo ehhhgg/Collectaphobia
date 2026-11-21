@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 747d54ed5a31cc143ba1b134eee1075b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - audioSource: {instanceID: 0}
+  - popClip: {fileID: 8300000, guid: fd75fd4594a712a4180f883830468839, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

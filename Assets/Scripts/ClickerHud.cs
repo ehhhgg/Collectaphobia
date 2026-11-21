@@ -26,6 +26,7 @@ public class ClickerHud : MonoBehaviour
     [SerializeField] RarityCountLabel[] rarityCounts;
     [SerializeField] PhobiaReveal reveal;
     [SerializeField] Button exitButton;
+    [SerializeField] ShimmerSound shimmerSound;
 
     static readonly Color Accent = new(0.95f, 0.42f, 0.55f);
 
@@ -96,6 +97,8 @@ public class ClickerHud : MonoBehaviour
     public void ShowFirstUnlock(PhobiaDefinition def)
     {
         HideHint();
+        if (def != null && shimmerSound != null)
+            shimmerSound.PlayShimmer();
         if (reveal != null)
             reveal.Show(def, true);
         RefreshInventory();
@@ -122,6 +125,8 @@ public class ClickerHud : MonoBehaviour
         HideHint();
         if (def == null)
             return;
+        if (firstTime && shimmerSound != null)
+            shimmerSound.PlayShimmer();
         if (reveal != null)
             reveal.ShowMerge(def, firstTime);
         ShowToast($"Merged into {def.Label}  ·  {RarityStyle.Label(def.rarity)}", RarityStyle.Color(def.rarity), 2.6f);

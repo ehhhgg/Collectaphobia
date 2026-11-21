@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 3349f0b5c057e3242864b359a3cde155
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - audioSource: {instanceID: 0}
+  - shimmerClip: {fileID: 8300000, guid: a5586623b7c8c9e4192f86478160f4d7, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -6,6 +6,7 @@ public class ClickerGame : MonoBehaviour
     [SerializeField] ClickerWorld world;
     [SerializeField] ClickerHud hud;
     [SerializeField] ClickerCatalog catalog;
+    [SerializeField] LeverSound leverSound;
 
     [NonSerialized] public readonly GameState State = new();
     public ClickerCatalog Catalog => catalog;
@@ -58,6 +59,9 @@ public class ClickerGame : MonoBehaviour
             Notify();
             return;
         }
+
+        if (leverSound != null)
+            leverSound.RegisterClick();
 
         RegisterClick();
         hud.SpawnClickPopup();

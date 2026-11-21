@@ -19,6 +19,7 @@ public class ClickerWorld : MonoBehaviour
     [SerializeField] PhobiaBall ballPrefab;
     [SerializeField] MachineAnimatiorScript machineAnimatior;
     [SerializeField] RectTransform bankTarget;
+    [SerializeField] PopSound popSound;
 
     readonly List<GameObject> _shelfItems = new();
     readonly List<PhobiaBall> _sealedBalls = new();
@@ -90,6 +91,9 @@ public class ClickerWorld : MonoBehaviour
 
         if (machineAnimatior != null)
             machineAnimatior.PlayAnim();
+
+        if (popSound != null)
+            popSound.RegisterBall();
 
         if (SealedCount >= MaxSealedOnShelf)
         {
